@@ -1,10 +1,2 @@
-/vendor/bin
-/vendor/composer
-/vendor/phpunit
-/vendor/symfony
-/vendor/zendframework
-/vendor/educoder
-/vendor/murganikolay
-/vendor/smarty
 /data/SmartyModule/templates_c/*.php
 /data/log

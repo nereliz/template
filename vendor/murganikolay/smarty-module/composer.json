@@ -1,0 +1,28 @@
+{
+    "name": "murganikolay/smarty-module",
+    "description": "Smarty template engine module for Zend Framework 2",
+    "homepage": "https://github.com/MurgaNikolay/SmartyModule",
+    "type": "library",
+    "keywords": [
+        "zf2",
+        "zend",
+        "module",
+        "smarty",
+        "view"
+    ],
+    "require": {
+        "zendframework/zendframework": "2.*",
+        "smarty/smarty": "3.1.*"
+    },
+    "authors": [
+        {
+            "name": "Murga Nikolay",
+            "email": "work@murga.kiev.ua"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "SmartyModule\\": "src/"
+        }
+    }
+}
