@@ -1,6 +1,9 @@
 <?php
 return [
     'modules' => [
+        //'ZendDeveloperTools',
+        'DoctrineModule',
+        'DoctrineORMModule',
         'Profile',
         'Application',
         'Auth',

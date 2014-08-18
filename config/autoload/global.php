@@ -19,27 +19,22 @@ return [
     ],
     'application' => [
         'site' => [
-            'name' => 'NGN Provider',
-            'url'  => 'http://portal.frapi'
+            'name' => "Testing",
+            'url'  => "http://telinsta.ngtnc.co",
         ],
         'template' => [
             'layout/messages' =>  __DIR__ . "/../../module/Application/view/layout/messages.tpl",
             'layout/topmenu'  =>  __DIR__ . "/../../module/Application/view/layout/top-menu.tpl",
             'form/element'    =>  __DIR__ . "/../../module/Application/view/layout/form/element.tpl",
         ],
-        'ngn_api' => [
-            'url'         => 'http://api.frapi',
-            'auth_user'   => 'auth',
-            'auth_secret' => 'fbc20ace4014bb000cf1336d13d8c6dc7c65fbd5',
-            'auth_type'   => 'digest'
-        ],
+        
         'defaults' => [
-            'customer' => [
-                'types' => [
-                    'reseller' => 'Reseller',
-                    'customer' => 'Customer'
-                ]
-            ]
         ]
-    ]
+    ],
+    'db' => [
+        'driver' => 'Mysqli',
+        'database' => 'nb_cms',
+        'username' => 'nb_cms',
+        'password' => '2x6SSnhF4ZEV6h3t'
+    ],
 ];

@@ -71,7 +71,7 @@ class TemplatePathStack implements ResolverInterface
                 stream_wrapper_register('zend.view', 'Zend\View\Stream');
             }
         }
-        
+
         $this->paths = new SplStack;
         if (null !== $options) {
             $this->setOptions($options);
@@ -93,6 +93,7 @@ class TemplatePathStack implements ResolverInterface
                 (is_object($options) ? get_class($options) : gettype($options))
             ));
         }
+
         foreach ($options as $key => $value) {
             switch (strtolower($key)) {
                 case 'lfi_protection':
@@ -301,7 +302,7 @@ class TemplatePathStack implements ResolverInterface
         if (pathinfo($name, PATHINFO_EXTENSION) == '') {
             $name .= '.' . $defaultSuffix;
         }
-        
+
         foreach ($this->paths as $path) {
             $file = new SplFileInfo($path . $name);
             if ($file->isReadable()) {

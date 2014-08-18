@@ -373,4 +373,5 @@ return array(
     'SmartyException' => $vendorDir . '/smarty/smarty/distribution/libs/Smarty.class.php',
     'Smarty_Security' => $vendorDir . '/smarty/smarty/distribution/libs/sysplugins/smarty_security.php',
     'Text_Template' => $vendorDir . '/phpunit/php-text-template/Text/Template.php',
+    'ZendDeveloperTools\\Module' => $vendorDir . '/zendframework/zend-developer-tools/Module.php',
 );
