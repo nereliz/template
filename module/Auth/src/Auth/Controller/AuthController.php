@@ -41,7 +41,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
             $user       = new User();
             $builder    = new AnnotationBuilder();
             $this->form = $builder->createForm( $user );
-            $this->form->setAttribute( 'action', 'auth/authenticate' );
+            $this->form->setAttribute( 'action', '/auth/authenticate' );
             $this->form->setAttribute( 'method', 'post' );
             $this->form->setAttribute( 'class', 'form-horizontal' );
         }
@@ -60,7 +60,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
         if( $this->getAuthService()->hasIdentity() )
             return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
        
-        $form = $this->getForm(); 
+        $form    = $this->getForm();
         $form->prepare();
         return $this->finalise( [ 'form' => $form ] );
     }
@@ -80,11 +80,12 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
                     ->setCredential( $request->getPost( 'password' ) );
     
                 $result = $this->getAuthService()->authenticate();
-                foreach( $result->getMessages() as $message )
+                //ZF2 Authentication messages
+                /*foreach( $result->getMessages() as $message )
                 {
                     //save message temporary into flashmessenger
-                    $this->flashmessenger()->addMessage( $message );
-                }
+                    $this->flashmessenger()->addMessage( $message . "@success" );
+                }*/
     
                 if( $result->isValid() )
                 {
@@ -97,8 +98,10 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
                     }
                     $this->getAuthService()->getStorage()->write( $request->getPost( 'username' ) );
                     $this->flashmessenger()->addMessage( "You've been logged in@success" );
-                    $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                    return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
                 }
+                $this->flashmessenger()->addMessage( "Wrong username or password.@danger" );
+                return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
             }
         }
         return $this->forward()->dispatch( 'Auth\\Controller\\Auth', array( 'action' => 'login' ) );
@@ -109,7 +112,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
         $this->getSessionStorage()->forgetMe();
         $this->getAuthService()->clearIdentity();
     
-        $this->flashmessenger()->addMessage("You've been logged out");
+        $this->flashmessenger()->addMessage("You've been logged out@success");
         return $this->redirect()->toRoute( 'login' );
     }        
 }

@@ -4,9 +4,11 @@ namespace Application;
 
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Authentication\AuthenticationService;
+use Zend\Authentication\Storage;
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
 
-use Application\View\Helper;
-
+use \Auth\Model\AuthStorage;
 
 class Module
 {
@@ -59,7 +61,7 @@ class Module
         });        
         
         $e->getApplication()->getServiceManager()->get( 'viewhelpermanager' )->setFactory( 'ngnview', function( $sm ) use ( $e ) {
-             return new Helper( $e->getRouteMatch() );
+             return new View\Helper( $e->getRouteMatch() );
         });
     }
 
@@ -127,16 +129,35 @@ class Module
             ],
             'factories' => [
                 'Logger' => function($sm) {
-                        $logger = new \Zend\Log\Logger;
-                        
-                        if( !is_dir( './data/log/' . date( 'Y' ) . '/' . date( 'm' ) ) )
-                            mkdir( './data/log/' . date( 'Y' ) . '/' . date( 'm' ), 0777, true  ); 
+                    $logger = new \Zend\Log\Logger;
 
-                        $writer = new \Zend\Log\Writer\Stream( './data/log/' . date( 'Y' ) . '/' . date( 'm' ) . '/' . date( 'd' ) . '.log' );
-                        $logger->addWriter( $writer );  
-                                        
-                        return $logger;
-                    },
+                    if( !is_dir( './data/log/' . date( 'Y' ) . '/' . date( 'm' ) ) )
+                        mkdir( './data/log/' . date( 'Y' ) . '/' . date( 'm' ), 0777, true  ); 
+
+                    $writer = new \Zend\Log\Writer\Stream( './data/log/' . date( 'Y' ) . '/' . date( 'm' ) . '/' . date( 'd' ) . '.log' );
+                    $logger->addWriter( $writer );  
+
+                    return $logger;
+                },
+                'Auth\\Model\\AuthStorage' => function( $sm )
+                {
+                    return new \Auth\Model\AuthStorage( 'asterisk' );  
+                },
+
+                'AuthService' => function($sm) {
+                    //My assumption, you've alredy set dbAdapter
+                    //and has users table with columns : user_name and pass_word
+                    //that password hashed with md5
+                    $dbAdapter           = $sm->get( 'Zend\\Db\\Adapter\\Adapter' );
+                    $dbTableAuthAdapter  = new DbTableAuthAdapter( $dbAdapter, 
+                    'us_users','us_username','us_password', 'MD5(?)');
+
+                    $authService = new AuthenticationService();
+                    $authService->setAdapter( $dbTableAuthAdapter );
+                    $authService->setStorage( $sm->get( 'Auth\\Model\\AuthStorage' ) );
+
+                    return $authService;
+                },
             ],
         ];
     }

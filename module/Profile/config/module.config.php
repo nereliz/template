@@ -2,7 +2,7 @@
 return [
     'controllers' => [
         'invokables' => [
-            'Profile\Controller\Profile' => 'Profile\Controller\ProfileController',
+            'Profile\\Controller\\Profile' => 'Profile\\Controller\\ProfileController',
         ],
     ],
     // The following section is new and should be added to your file
@@ -17,7 +17,7 @@ return [
                         'id'     => '[0-9]+',
                     ],
                     'defaults' => [
-                        'controller' => 'Profile\Controller\Profile',
+                        'controller' => 'Profile\\Controller\\Profile',
                         'action'     => 'index',
                     ],
                 ],

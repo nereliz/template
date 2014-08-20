@@ -86,6 +86,12 @@ return [
         'services' => [
             'session' => new Zend\Session\Container( 'ngn_portal' ),
         ],
+        'aliases' =>[
+            'Zend\Authentication\AuthenticationService' => 'my_auth_service',
+        ],
+        'invokables' => [
+            'my_auth_service' => 'Zend\Authentication\AuthenticationService',
+        ],
     ],
     'translator' => [
         'locale' => 'en_US',

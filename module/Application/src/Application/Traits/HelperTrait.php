@@ -1,7 +1,8 @@
 <?php
 
-namespace Application\Traits;
+use Zend\Authentication\AuthenticationService;
 
+namespace Application\Traits;
 trait HelperTrait{
     
     protected $config;
@@ -10,11 +11,17 @@ trait HelperTrait{
     {
         $this->config = $config;
     }
+    
+    public function getAuth()
+    { 
+        return $this->getServiceLocator()->get( 'AuthService' );
+    }
                         
     
     public function finalise( $data )
     {
-        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config ];
+        $auth = $this->getAuth();
+        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth ];
     }
     
     /**
@@ -25,7 +32,7 @@ trait HelperTrait{
      */
     private function isAuth( $type = false )
     {
-        if( !$this->identity() )
+        if( !$this->getAuth()->hasIdentity() )
         {
             $this->flashmessenger()->addMessage( "You need to loign first@danger" );
             $this->redirect()->toRoute( 'auth', [ 'action'=> 'login' ] );

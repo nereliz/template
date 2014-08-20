@@ -27,29 +27,7 @@ class Module
 
     public function getServiceConfig()
     {
-        return [
-            'factories'=> [
-                'Auth\\Model\\AuthStorage' => function( $sm )
-                {
-                    return new \Auth\Model\AuthStorage( 'asterisk' );  
-                },
-        
-                'AuthService' => function($sm) {
-                    //My assumption, you've alredy set dbAdapter
-                    //and has users table with columns : user_name and pass_word
-                    //that password hashed with md5
-                    $dbAdapter           = $sm->get( 'Zend\\Db\\Adapter\\Adapter' );
-                    $dbTableAuthAdapter  = new DbTableAuthAdapter( $dbAdapter, 
-                        'us_users','us_username','us_password', 'MD5(?)');
-        
-                    $authService = new AuthenticationService();
-                    $authService->setAdapter( $dbTableAuthAdapter );
-                    $authService->setStorage( $sm->get( 'Auth\\Model\\AuthStorage' ) );
-        
-                    return $authService;
-                },
-            ],
-        ];
+        return [];
     }
 
     public function getConfig()
