@@ -10,20 +10,16 @@ use Profile\Form\ChangePasswordForm;
 
 use Application\ConfigAwareInterface;
 use Application\Traits\HelperTrait;  
-use Application\Traits\APITrait;     
-use Application\Traits\AuthTrait;
 
 class ProfileController extends AbstractActionController
     implements ConfigAwareInterface
 {
     use HelperTrait;
-    use APITrait;
-    use AuthTrait;
 
     public function indexAction()
     {
-        if( !$this->isAuth() )
-            return false;
+        if( !$this->getServiceLocator()->get( 'AuthService' )->hasIdentity() )
+            return $this->redirect()->toRoute( 'login' );
         
         $dataForm = $this->resolveProfileDataForm();
         

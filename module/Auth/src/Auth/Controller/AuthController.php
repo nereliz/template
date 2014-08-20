@@ -3,89 +3,113 @@
 namespace Auth\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Form\Annotation\AnnotationBuilder;
 use Zend\View\Model\ViewModel;
-
-use Auth\Form\LoginForm;
-
 use Application\ConfigAwareInterface;
-use Application\Traits\HelperTrait;
-use Application\Traits\APITrait;
-use Application\Traits\AuthTrait;
+
+use Auth\Model\User;
 
 
-class AuthController extends AbstractActionController
-    implements ConfigAwareInterface
+class AuthController extends AbstractActionController implements ConfigAwareInterface
 {
-    use HelperTrait;
-    use APITrait;
-    use AuthTrait;
+    use \Application\Traits\HelperTrait;
+    
+    protected $form;
+    protected $storage;
+    protected $authservice;
+    
+    public function getAuthService()
+    {
+        if( !$this->authservice )
+            $this->authservice = $this->getServiceLocator()->get( 'AuthService' );
+    
+        return $this->authservice;
+    }
+    
+    public function getSessionStorage()
+    {
+        if( !$this->storage )
+            $this->storage = $this->getServiceLocator()->get('Auth\\Model\\AuthStorage');
+    
+        return $this->storage;
+    }
+    
+    public function getForm()
+    {
+        if( !$this->form )
+        {
+            $user       = new User();
+            $builder    = new AnnotationBuilder();
+            $this->form = $builder->createForm( $user );
+            $this->form->setAttribute( 'action', 'auth/authenticate' );
+            $this->form->setAttribute( 'method', 'post' );
+            $this->form->setAttribute( 'class', 'form-horizontal' );
+        }
+    
+        return $this->form;
+    }
     
     public function indexAction()
     {
-        $this->redirect()->toRoute( 'auth', [ 'action' => 'login' ] );
+        $this->redirect()->toRoute( 'login' );
     }
-        
+    
     public function loginAction()
     {
-        $form = new LoginForm();
-        $form->setAttribute( 'action', '/auth/login' );
-        
-        if( $this->getRequest()->isPost() )
+        //if already login, redirect to success page 
+        if( $this->getAuthService()->hasIdentity() )
+            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+       
+        $form = $this->getForm(); 
+        $form->prepare();
+        return $this->finalise( [ 'form' => $form ] );
+    }
+    
+    public function authenticateAction()
+    {
+        $form     = $this->getForm();    
+        $request  = $this->getRequest();
+        if( $request->isPost() )
         {
-            $form->setData( $this->getRequest()->getPost() );
-          
-            if( $form->isValid() )
+            $form->setData( $request->getPost() );
+            if( $form->isValid() ) 
             {
-                
+                //check authentication...
                 $this->getAuthService()->getAdapter()
-                    ->setIdentity( $form->get( 'username' )->getValue() )
-                    ->setCredential( $form->get( 'password' )->getValue() );
-                                                                                                                                      
+                    ->setIdentity( $request->getPost( 'username' ) )
+                    ->setCredential( $request->getPost( 'password' ) );
+    
                 $result = $this->getAuthService()->authenticate();
-                                
+                foreach( $result->getMessages() as $message )
+                {
+                    //save message temporary into flashmessenger
+                    $this->flashmessenger()->addMessage( $message );
+                }
+    
                 if( $result->isValid() )
                 {
-                    if( $form->get( 'rememberme' )->getValue() )
+                    //check if it has rememberMe :
+                    if( $request->getPost( 'rememberme' ) == 1 )
                     {
                         $this->getSessionStorage()->setRememberMe( 1 );
-                        //set storage again
+                        //set storage again 
                         $this->getAuthService()->setStorage( $this->getSessionStorage() );
                     }
+                    $this->getAuthService()->getStorage()->write( $request->getPost( 'username' ) );
                     $this->flashmessenger()->addMessage( "You've been logged in@success" );
                     $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
-                    
-                    $this->getServiceLocator()->get( 'Logger' )->debug( $form->get( 'username' )->getValue() . " user loged in" );
-                    
                 }
-                else
-                {
-                    $this->flashmessenger()->addMessage( "Login failed@danger" );
-                    $this->redirect()->toRoute( 'auth', [ 'action'=> 'login' ] );
-                }
-                    
-            }            
+            }
         }
-        
-        $form->prepare();
-                
-        return $this->finalise( [ 'form' => $form ] );
+        return $this->forward()->dispatch( 'Auth\\Controller\\Auth', array( 'action' => 'login' ) );
     }
     
     public function logoutAction()
     {
-        if( $this->identity() )
-        {
-            $username = $this->identity()['username'];
-            $this->getSessionStorage()->forgetMe();
-            $this->getAuthService()->clearIdentity();
-            
-            $this->getServiceLocator()->get( 'Logger' )->debug( $username . " user loged out" );             
-            $this->flashmessenger()->addMessage( "You've been logged out@success" );
-        }
-        else
-            $this->flashmessenger()->addMessage( "You need to login first@danger" );
-            
-        $this->redirect()->toRoute( 'auth', [ 'action'=> 'login' ] );
-    }
-        
+        $this->getSessionStorage()->forgetMe();
+        $this->getAuthService()->clearIdentity();
+    
+        $this->flashmessenger()->addMessage("You've been logged out");
+        return $this->redirect()->toRoute( 'login' );
+    }        
 }

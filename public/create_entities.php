@@ -18,8 +18,8 @@
     'driver' => 'pdo_mysql',
     'host' => 'localhost',
     'port' => '3306',
-    'user' => 'root',
-    'password' => 'nerijus',
+    'user' => 'asterisk',
+    'password' => 'qwerty76',
     'dbname' => 'asterisk',
     'charset' => 'utf8',
     );

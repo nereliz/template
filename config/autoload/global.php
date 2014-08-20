@@ -19,8 +19,8 @@ return [
     ],
     'application' => [
         'site' => [
-            'name' => "Testing",
-            'url'  => "http://telinsta.ngtnc.co",
+            'name' => "Cloud PBX Admin",
+            'url'  => "http://nerijus.telinsta.com",
         ],
         'template' => [
             'layout/messages' =>  __DIR__ . "/../../module/Application/view/layout/messages.tpl",
@@ -33,8 +33,9 @@ return [
     ],
     'db' => [
         'driver' => 'Mysqli',
-        'database' => 'nb_cms',
-        'username' => 'nb_cms',
-        'password' => '2x6SSnhF4ZEV6h3t'
+        'host' => 'localhost',
+        'database' => 'asterisk',
+        'username' => 'asterisk',
+        'password' => 'qwerty78'
     ],
 ];

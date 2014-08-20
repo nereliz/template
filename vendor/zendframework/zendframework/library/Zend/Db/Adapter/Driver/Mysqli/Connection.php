@@ -199,7 +199,7 @@ class Connection implements ConnectionInterface, Profiler\ProfilerAwareInterface
                 $this->resource->options($option, $value);
             }
         }
-
+        
         $this->resource->real_connect($hostname, $username, $password, $database, $port, $socket);
 
         if ($this->resource->connect_error) {
