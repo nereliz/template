@@ -55,7 +55,7 @@ class Module
         
         $sharedManager = $eventManager->getSharedManager();
         $sm = $e->getApplication()->getServiceManager();
-        $sharedManager->attach( 'Zend\Mvc\Application', 'dispatch.error', function( $e ) use ( $sm ) {
+        $sharedManager->attach( 'Zend\\Mvc\\Application', 'dispatch.error', function( $e ) use ( $sm ) {
             if( $e->getParam( 'exception' ) )
                 $sm->get( 'Logger' )->crit( $e->getParam( 'exception' ) );
         });        
@@ -73,7 +73,7 @@ class Module
     public function getAutoloaderConfig()
     {
         return array(
-            'Zend\Loader\StandardAutoloader' => array(
+            'Zend\\Loader\\StandardAutoloader' => array(
                 'namespaces' => array(
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
                 ),

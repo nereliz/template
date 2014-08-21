@@ -1,18 +1,22 @@
 <?php
-
 namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
+use Application\ConfigAwareInterface;
+use Application\Traits\HelperTrait;
+
 class IndexController extends AbstractActionController
+    implements ConfigAwareInterface
 {
+    use HelperTrait;
     public function indexAction()
     {
-        if( $this->identity() )
+        if( $this->getAuth()->hasIdentity() )
             $this->redirect()->toRoute( 'profile', [ 'action' => 'index' ] );
         else
-            $this->redirect()->toRoute( 'auth', [ 'action' => 'index' ] );
+            $this->redirect()->toRoute( 'auth', [ 'action' => 'login' ] );
     }
 
 }

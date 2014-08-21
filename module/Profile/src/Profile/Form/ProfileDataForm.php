@@ -17,26 +17,6 @@ class ProfileDataForm extends Form
         $this->setAttribute( 'method', 'post' );
         $this->setAttribute( 'class', 'form-horizontal' );
         
-        $this->add( [ 'name' => 'name',
-            'attributes' => [
-                'type'  => 'text',
-                'class' => 'form-control'
-            ],
-            'options' => [
-                'label' => 'Name',
-            ],
-        ]);
-        
-        $this->add( [ 'name' => 'email',
-            'attributes' => [
-                'type'  => 'email',
-                'class' => 'form-control'
-            ],
-            'options' => [
-                'label' => 'Email',
-            ],
-        ]);
-        
         $this->add( [ 'name' => 'username',
             'attributes' => [
                 'type'  => 'text',
@@ -77,27 +57,6 @@ class ProfileDataForm extends Form
     {
         $inputFilter = new InputFilter();
         
-        $inputFilter->add( [
-            'name'     => 'name',
-            'required' => true,
-            'filters'  => [
-                [ 'name' => 'StripTags' ],
-                [ 'name' => 'StringTrim' ],
-            ]
-        ]);
-        
-        $inputFilter->add( [
-            'name'     => 'email',
-            'required' => true,
-            'filters'  => [
-                [ 'name' => 'StripTags' ],
-                [ 'name' => 'StringTrim' ],
-            ],
-            'validators' => [
-                [ 'name' => 'EmailAddress' ],
-            ],
-        ]);
-    
         $inputFilter->add( [
             'name'     => 'username',
             'required' => true,
