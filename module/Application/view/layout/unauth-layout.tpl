@@ -1,6 +1,7 @@
 <html lang="en">
   <head>
 	{include file="`$smarty.current_dir`/head.tpl"}
+	{$this->headLink()->appendStylesheet( "`$this->basePath`/css/ua-style.css" )}
   </head>
 
   <body>

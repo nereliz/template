@@ -1,3 +1,4 @@
+
 <meta charset="utf-8">
 {if isset( $config ) }
    {$this->headTitle( {$config['site']['name']}  )->setSeparator(' - ')->setAutoEscape(false)}

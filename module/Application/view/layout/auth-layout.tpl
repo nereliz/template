@@ -26,12 +26,8 @@
         </div>
     </div>
 
-    <div class="container-fluid">
-	
-	<div class="page-content">
-      {$this->content}
+   {$this->content}
 
-    </div>
 
     </div> <!-- /container -->
 
