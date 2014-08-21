@@ -25,9 +25,9 @@ trait HelperTrait{
             return false;
     }
     
-    public function getEm()
+    public function getEManager()
     {
-        return  $this->getServiceLocator()->get( 'Doctrine\\ORM\\EntityManager' );
+        return $this->getServiceLocator()->get( 'Doctrine\\ORM\\EntityManager' );
     }
                         
     

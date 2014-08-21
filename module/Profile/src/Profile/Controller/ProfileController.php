@@ -4,17 +4,39 @@ namespace Profile\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
+use Zend\Form\Annotation\AnnotationBuilder;
 
-use Profile\Form\ProfileDataForm;
 use Profile\Form\ChangePasswordForm;
 
 use Application\ConfigAwareInterface;
 use Application\Traits\HelperTrait;  
 
+use Profile\Model\Profile;
+use Profile\Model\ProfilePassword;
+
 class ProfileController extends AbstractActionController
     implements ConfigAwareInterface
 {
     use HelperTrait;
+    
+    protected $storage;
+    protected $authservice;
+        
+    public function getAuthService()
+    {
+        if( !$this->authservice )
+            $this->authservice = $this->getServiceLocator()->get( 'AuthService' );
+
+        return $this->authservice;
+    }
+
+    public function getSessionStorage()
+    {
+        if( !$this->storage )
+            $this->storage = $this->getServiceLocator()->get('Auth\\Model\\AuthStorage');
+
+        return $this->storage;
+    }
 
     public function indexAction()
     {
@@ -22,9 +44,7 @@ class ProfileController extends AbstractActionController
             return $this->redirect()->toRoute( 'login' );
         
         $dataForm = $this->resolveProfileDataForm();
-        
-        $pwdForm = new ChangePasswordForm();
-        $pwdForm->setAttribute( 'action', '/profile/index' );
+        $pwdForm = $this->resolveProfilePasswordForm();
         
         $dataForm->prepare();
         $pwdForm->prepare();
@@ -36,19 +56,29 @@ class ProfileController extends AbstractActionController
                 $dataForm->setData( $this->getRequest()->getPost() );
                 if( $dataForm->isValid() )
                 {
-                    if( !$this->updateProfile( $dataForm->getData() ) )
+                    $result = $this->updateProfile( $dataForm->getData() );
+                    switch( $result )
                     {
-                       if( $this->getPest()->lastStatus() == 406 )
-                       {
-                           $dataForm->get( 'username' )->setMessages( [ 'This user name already in use' ] );
-                           return $this->finalise( [ 'dataForm' => $dataForm, 'pwdForm' => $pwdForm ] );
-                       }
-                       else
-                           return false;
+                        case 1:
+                            $this->flashmessenger()->addMessage( "Username updated successfully.@success" );
+                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            break;
+
+                        case 2:
+                            $dataForm->get( 'conf_password' )->setMessages( [ "Invalid Password." ] );
+                            $dataForm->get( 'conf_password' )->setValue( "" );
+                            break;
+
+                        case 3:
+                            $dataForm->get( 'us_username' )->setMessages( [ "This username is already in use." ] );
+                            $dataForm->get( 'conf_password' )->setValue( "" );
+                            break;
+
+                        default:
+                            $this->flashmessenger()->addMessage( "Unexpected erro occured please try again later.@danger" );
+                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            break;
                     }
-                    else 
-                        return true;
-                
                 }
                 else
                     $dataForm->get( 'conf_password' )->setValue( "" );
@@ -60,15 +90,33 @@ class ProfileController extends AbstractActionController
                 $pwdForm->setData( $this->getRequest()->getPost() );
                 if( $pwdForm->isValid() )
                 {
-                    if( $pwdForm->get( 'password' )->getValue() != $pwdForm->get( 'ret_password' )->getValue() )
+                    $result = $this->changePassword( $pwdForm->getData() );
+                    switch( $result )
                     {
-                        $pwdForm->get( 'password' )->setMessages( [ "Passwords doesn't match" ] );
-                        $pwdForm->get( 'ret_password' )->setMessages( [ "Password doesn't match" ] );
-                        $pwdForm->get( 'conf_password' )->setValue( "" );
-                    }
-                    else
-                    {
-                        return $this->changePassword( $pwdForm->getData() );
+                        case 1:
+                            $this->flashmessenger()->addMessage( "Password updated successfully.@success" );
+                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            break;
+
+                        case 2:
+                            $pwdForm->get( 'conf_password' )->setMessages( [ "Invalid Password." ] );
+                            $pwdForm->get( 'conf_password' )->setValue( "" );
+                            $pwdForm->get( 'us_password' )->setValue( "" );
+                            $pwdForm->get( 'ret_password' )->setValue( "" );
+                            break;
+
+                        case 3:
+                            $pwdForm->get( 'us_password' )->setMessages( [ "Passwords doesn't match" ] );
+                            $pwdForm->get( 'ret_password' )->setMessages( [ "Passwords doesn't match" ] );
+                            $pwdForm->get( 'conf_password' )->setValue( "" );
+                            $pwdForm->get( 'us_password' )->setValue( "" );
+                            $pwdForm->get( 'ret_password' )->setValue( "" );
+                            break;
+
+                        default:
+                            $this->flashmessenger()->addMessage( "Unexpected erro occured please try again later.@danger" );
+                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            break;
                     }
                 }
                 else
@@ -82,12 +130,28 @@ class ProfileController extends AbstractActionController
     
     private function resolveProfileDataForm()
     {
-        $form = new ProfileDataForm();
+        $profile = new Profile();
+        $builder = new AnnotationBuilder();
+        $form    = $builder->createForm( $profile );
+        $form->setAttribute( 'method', 'post' );
+        $form->setAttribute( 'class', 'form-horizontal' );
         $form->setAttribute( 'action', '/profile/index' );
-        $form->get( 'username' )->setValue( $this->getIdentity()->getUsUsername() );
-        
-        return $form;
-    }    
+        $form->get( 'us_username' )->setValue( $this->getIdentity()->getUsUsername() );
+
+        return $form;                                                                                                         
+    }
+    
+    private function resolveProfilePasswordForm()
+    {
+        $profilePwd = new ProfilePassword();
+        $builder = new AnnotationBuilder();
+        $form    = $builder->createForm( $profilePwd );
+        $form->setAttribute( 'method', 'post' );
+        $form->setAttribute( 'class', 'form-horizontal' );
+        $form->setAttribute( 'action', '/profile/index' );
+
+        return $form;                                                                                                         
+    }
     
     /**
      * Changes profile information.
@@ -100,25 +164,24 @@ class ProfileController extends AbstractActionController
     private function updateProfile( $data )
     {
         if( !$this->validPassword( $data['conf_password'] ) )
-            return;
+            return 2;
+            
+        if( $data['us_username'] == $this->getIdentity()->getUsUsername() )
+            return 1;
+            
+        $em = $this->getEManager();
+        $user = $em->getRepository( 'Application\\Entity\\UsUsers' )->findOneBy( [ 'usUsername' => $data['us_username'] ] );
         
-        $password = $data['conf_password'];
-        unset( $data['submit_data'] );
-        unset( $data['conf_password'] );    
-        
-        if( !$this->updateProfileData( $data, 'Profile information' ) )
-            return;                
-          
-        $this->getSessionStorage()->forgetMe(); 
-        $this->getAuthService()->clearIdentity();      
+        if( $user ) 
+            return 3;
+        else
+            $user = $em->getRepository( 'Application\\Entity\\UsUsers' )->findOneBy( [ 'usUsername' => $this->getIdentity()->getUsUsername() ] );
 
-        $this->getAuthService()->getAdapter()
-            ->setIdentity( $data['username'] )   
-            ->setCredential( $password );
-                                                                                                                  
-        $result = $this->getAuthService()->authenticate();                                                                                                                                          
-                
-        return;
+        $user->setUsUsername( $data['us_username'] );
+        $em->flush();
+          
+        $this->getAuthService()->getStorage()->write( $user );
+        return 1;
     }
     
     /**
@@ -132,17 +195,19 @@ class ProfileController extends AbstractActionController
     private function changePassword( $data )
     {
         if( !$this->validPassword( $data['conf_password'] ) )
-            return;
-                
-        unset( $data['submit_pwd'] );
-        unset( $data['ret_password'] );
-        unset( $data['conf_password'] );
-        
-        if( !$this->updateProfileData( $data, 'Password' ) )
-            return;
-        //Additional acctions if password changes succsfully
+            return 2;
             
-        return;             
+        if( $data['us_password'] != $data['ret_password'] )
+            return 3;
+        
+        $em = $this->getEManager();
+        $user = $em->getRepository( 'Application\\Entity\\UsUsers' )->findOneBy( [ 'usUsername' => $this->getIdentity()->getUsUsername() ] );
+
+        $user->setUsPassword( $user->hashPassword( $data['us_password'] ) );
+        $em->flush();
+          
+        $this->getAuthService()->getStorage()->write( $user );
+        return 1;                
     }
     
     /**
@@ -155,39 +220,9 @@ class ProfileController extends AbstractActionController
      */
     private function validPassword( $password )
     {
-        $this->callAPIGet( $success, "auth/username/" . $this->identity()['username'] . "/password/" . $password );
-        if( !$success )
-        {
-            $this->flashmessenger()->addMessage( "Password provided is incorect@danger" );
-            $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
-            return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Sends update profile request.
-     *
-     * @param array  $data Data to post to API for updating profile.
-     * @param string $name Name off data package, like password or profile information.
-     * @return bool
-     */
-    private function updateProfileData( $data, $name )
-    {
-        $result = $this->callAPIPost( $success, "profile", $data );
-        if( !$success )
-        {
-            if( $result['code'] == 406 )
-                return false;
-            
-            $this->flashmessenger()->addMessage( "Failed to update your " . lcfirst( $name ) . ". Plese try again later.@danger" );
-            $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
-            return false;
-        }
-                
-        $this->flashmessenger()->addMessage( ucfirst( $name ) . " updated succesfully@success" );
-        $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
-        return true;
-    }
-    
+        if( $this->getIdentity()->hashPassword( $password ) == $this->getIdentity()->getUsPassword() )
+            return true;
+        
+        return false;
+    }    
 }

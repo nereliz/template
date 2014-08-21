@@ -1,5 +1,5 @@
 <?php 
-namespace Auth\Model;
+namespace Profile\Model;
 
 use Zend\Form\Annotation;
   
@@ -7,7 +7,7 @@ use Zend\Form\Annotation;
  * @Annotation\Hydrator("Zend\Stdlib\Hydrator\ObjectProperty")
  * @Annotation\Name("User")
  */
-class User
+class Profile
 {
     /**
      * @Annotation\Type("Zend\Form\Element\Text")
@@ -17,7 +17,7 @@ class User
      * @Annotation\Filter({"name":"StringTrim"})
      * @Annotation\Options({"label":"Username:"})
      */
-    public $username;
+    public $us_username;
 
     /**
      * @Annotation\Type("Zend\Form\Element\Password")
@@ -28,17 +28,11 @@ class User
      * @Annotation\Validator({"name":"StringLength", "options": {"min":6}})
      * @Annotation\Options({"label":"Password:"})
      */
-    public $password;
-
-    /**
-     * @Annotation\Type("Zend\Form\Element\Checkbox")
-     * @Annotation\Options({"label":"Remember Me"})
-     */
-    public $rememberme;
+    public $conf_password;
 
     /**
      * @Annotation\Type("Zend\Form\Element\Submit")
-     * @Annotation\Attributes({"value":"Submit","class":"btn btn-primary"})
+     * @Annotation\Attributes({"name":"submit_data","value":"Submit","class":"btn btn-primary", "id":"submit_profile_data"})
      */
     public $submit;
 }
