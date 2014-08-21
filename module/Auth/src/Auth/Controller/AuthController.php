@@ -96,7 +96,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
                         //set storage again 
                         $this->getAuthService()->setStorage( $this->getSessionStorage() );
                     }
-                    $this->getAuthService()->getStorage()->write( $request->getPost( 'username' ) );
+                    $this->getAuthService()->getStorage()->write( $result->getIdentity() );
                     $this->flashmessenger()->addMessage( "You've been logged in@success" );
                     return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
                 }

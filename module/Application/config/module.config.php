@@ -3,43 +3,43 @@ return [
     'doctrine' => [
         'driver' => [
             'application_entities' => [
-                'class' =>'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
+                'class' =>'Doctrine\\ORM\\Mapping\\Driver\\AnnotationDriver',
                  'cache' => 'array',
                  'paths' => array(__DIR__ . '/../src/Application/Entity')
             ],
                                 
             'orm_default' => [
                 'drivers' => [
-                    'Application\Entity' => 'application_entities'
+                    'Application\\Entity' => 'application_entities'
                 ]
             ]
-        ]
+        ],
     ],                                       
     'router' => [
          'routes' => [
             
             'home' => [
-                'type' => 'Zend\Mvc\Router\Http\Segment',
+                'type' => 'Zend\\Mvc\\Router\\Http\\Segment',
                 'options' => [
                     'route'    => '/[:lang]',
                     'constraints' =>[
                         'lang' => '[a-z]{2}(-[A-Z]{2}){0,1}'
                     ],
                     'defaults' => [
-                        'controller' => 'Application\Controller\Index',
+                        'controller' => 'Application\\Controller\\Index',
                         'action'     => 'index'
                     ],
                 ],
             ],
             'index' => [
-                'type' => 'Zend\Mvc\Router\Http\Segment',
+                'type' => 'Zend\\Mvc\\Router\\Http\\Segment',
                 'options' => [
                     'route'    => '/[:lang]',
                     'constraints' =>[
                         'lang' => '[a-z]{2}(-[A-Z]{2}){0,1}'
                     ],
                     'defaults' => [
-                        'controller' => 'Application\Controller\Index',
+                        'controller' => 'Application\\Controller\\Index',
                         'action'     => 'index'
                     ],
                 ],
@@ -56,7 +56,7 @@ return [
                         'lang' => '[a-z]{2}(-[A-Z]{2}){0,1}'
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'Application\Controller',
+                        '__NAMESPACE__' => 'Application\\Controller',
                         'controller'    => 'Index',
                         'action'        => 'index',
                     ],
@@ -81,16 +81,10 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-            'translator' => 'Zend\I18n\Translator\TranslatorServiceFactory',
+            'translator' => 'Zend\\I18n\\Translator\\TranslatorServiceFactory',
         ],
         'services' => [
             'session' => new Zend\Session\Container( 'ngn_portal' ),
-        ],
-        'aliases' =>[
-            'Zend\Authentication\AuthenticationService' => 'my_auth_service',
-        ],
-        'invokables' => [
-            'my_auth_service' => 'Zend\Authentication\AuthenticationService',
         ],
     ],
     'translator' => [
@@ -105,7 +99,7 @@ return [
     ],
     'controllers' => [
         'invokables' => [
-            'Application\Controller\Index' => 'Application\Controller\IndexController'
+            'Application\\Controller\\Index' => 'Application\\Controller\\IndexController'
         ],
     ],
     'view_manager' => [

@@ -84,9 +84,7 @@ class ProfileController extends AbstractActionController
     {
         $form = new ProfileDataForm();
         $form->setAttribute( 'action', '/profile/index' );
-        $form->get( 'name' )->setValue( $this->identity()['name'] );
-        $form->get( 'username' )->setValue( $this->identity()['username'] );
-        $form->get( 'email' )->setValue( $this->identity()['email'] );
+        $form->get( 'username' )->setValue( $this->getIdentity()->getUsUsername() );
         
         return $form;
     }    

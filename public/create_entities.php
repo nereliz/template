@@ -19,7 +19,7 @@
     'host' => 'localhost',
     'port' => '3306',
     'user' => 'asterisk',
-    'password' => 'qwerty76',
+    'password' => 'qwerty78',
     'dbname' => 'asterisk',
     'charset' => 'utf8',
     );

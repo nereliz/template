@@ -6,9 +6,9 @@ use Zend\Mvc\ModuleRouteListener;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
-use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
+use Auth\Model\DoctrineAuthAdapter;
 
-use \Auth\Model\AuthStorage;
+use Auth\Model\AuthStorage;
 
 class Module
 {
@@ -110,7 +110,7 @@ class Module
                         $instance->setConfig( $config['application'] );
                     }
                 }
-                ]
+            ]
         ];
     }
     
@@ -148,12 +148,10 @@ class Module
                     //My assumption, you've alredy set dbAdapter
                     //and has users table with columns : user_name and pass_word
                     //that password hashed with md5
-                    $dbAdapter           = $sm->get( 'Zend\\Db\\Adapter\\Adapter' );
-                    $dbTableAuthAdapter  = new DbTableAuthAdapter( $dbAdapter, 
-                    'us_users','us_username','us_password', 'MD5(?)');
+                    $dAuthAdapter  = new DoctrineAuthAdapter( $sm, 'usUsername', 'usPassword' );
 
                     $authService = new AuthenticationService();
-                    $authService->setAdapter( $dbTableAuthAdapter );
+                    $authService->setAdapter( $dAuthAdapter );
                     $authService->setStorage( $sm->get( 'Auth\\Model\\AuthStorage' ) );
 
                     return $authService;

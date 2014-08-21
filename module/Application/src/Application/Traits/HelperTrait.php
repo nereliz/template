@@ -16,6 +16,19 @@ trait HelperTrait{
     { 
         return $this->getServiceLocator()->get( 'AuthService' );
     }
+    
+    public function getIdentity()
+    {
+        if( $this->getAuth()->hasIdentity() )
+            return $this->getAuth()->getIdentity();
+        else
+            return false;
+    }
+    
+    public function getEm()
+    {
+        return  $this->getServiceLocator()->get( 'Doctrine\\ORM\\EntityManager' );
+    }
                         
     
     public function finalise( $data )
