@@ -20,7 +20,12 @@ trait HelperTrait{
     public function getIdentity()
     {
         if( $this->getAuth()->hasIdentity() )
-            return $this->getAuth()->getIdentity();
+        {
+            $identity =  $this->getAuth()->getIdentity();
+            $em =  $this->getEManager();
+            $user = $em->getRepository( 'Application\\Entity\\UsUsers' )->findOneBy( [ 'usUsername' => $identity->getUsUsername() ] );
+            return $user;
+        }
         else
             return false;
     }
@@ -34,7 +39,8 @@ trait HelperTrait{
     public function finalise( $data )
     {
         $auth = $this->getAuth();
-        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth ];
+        $identity = $this->getIdentity();
+        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $identity ];
     }
     
     /**

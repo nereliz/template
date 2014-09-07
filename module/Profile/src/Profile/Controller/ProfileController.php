@@ -40,6 +40,10 @@ class ProfileController extends AbstractActionController
 
     public function indexAction()
     {
+        $em = $this->getEManager();
+        $conn = $em->getConnection();
+        $conn->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+        
         if( !$this->getServiceLocator()->get( 'AuthService' )->hasIdentity() )
             return $this->redirect()->toRoute( 'login' );
         

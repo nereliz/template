@@ -22,13 +22,13 @@ if( $zf2Path = getenv( 'ZF2_PATH' ) ?: ( is_dir( 'vendor/ZF2/library' ) ? 'vendo
       {
         include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
         Zend\Loader\AutoloaderFactory::factory( [
-            'Zend\Loader\StandardAutoloader' => [
+            'Zend\\Loader\\StandardAutoloader' => [
                 'autoregister_zf' => true
             ]
         ]);
     }
 }
 
-if( !class_exists( 'Zend\Loader\AutoloaderFactory' ) )
+if( !class_exists( 'Zend\\Loader\\AutoloaderFactory' ) )
     throw new RuntimeException( 'Unable to load ZF2. Run `php composer.phar install` or define a ZF2_PATH environment variable.' );
     
