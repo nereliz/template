@@ -6,15 +6,19 @@ namespace Application\Traits;
 trait HelperTrait{
     
     protected $config;
+    protected $authservice;
+                
+    public function getAuth()
+    {
+        if( !$this->authservice )
+            $this->authservice = $this->getServiceLocator()->get( 'AuthService' );
+
+        return $this->authservice;
+    }
     
     public function setConfig( $config )
     {
         $this->config = $config;
-    }
-    
-    public function getAuth()
-    { 
-        return $this->getServiceLocator()->get( 'AuthService' );
     }
     
     public function getIdentity()
@@ -39,8 +43,18 @@ trait HelperTrait{
     public function finalise( $data )
     {
         $auth = $this->getAuth();
-        $identity = $this->getIdentity();
-        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $identity ];
+        $idty = $this->getIdentity();
+        if( $idty )
+        {
+            if( $idty->getUpUserprofile()->getUpId() != 1 )
+                $aTenatns = $idty->getTeTenantNames();
+            else
+                $aTenants = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->getNamesIdsList();
+        }
+        else 
+            $aTenants = array();
+            
+        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $idty, 'aTenants' => $aTenants ];
     }
     
     /**

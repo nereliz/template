@@ -6,8 +6,6 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Form\Annotation\AnnotationBuilder;
 
-use Profile\Form\ChangePasswordForm;
-
 use Application\ConfigAwareInterface;
 use Application\Traits\HelperTrait;  
 
@@ -20,15 +18,6 @@ class ProfileController extends AbstractActionController
     use HelperTrait;
     
     protected $storage;
-    protected $authservice;
-        
-    public function getAuthService()
-    {
-        if( !$this->authservice )
-            $this->authservice = $this->getServiceLocator()->get( 'AuthService' );
-
-        return $this->authservice;
-    }
 
     public function getSessionStorage()
     {
@@ -40,11 +29,7 @@ class ProfileController extends AbstractActionController
 
     public function indexAction()
     {
-        $em = $this->getEManager();
-        $conn = $em->getConnection();
-        $conn->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-        
-        if( !$this->getServiceLocator()->get( 'AuthService' )->hasIdentity() )
+        if( !$this->getAuth()->hasIdentity() )
             return $this->redirect()->toRoute( 'login' );
         
         $dataForm = $this->resolveProfileDataForm();
@@ -184,7 +169,7 @@ class ProfileController extends AbstractActionController
         $user->setUsUsername( $data['us_username'] );
         $em->flush();
           
-        $this->getAuthService()->getStorage()->write( $user );
+        $this->getAuth()->getStorage()->write( $user );
         return 1;
     }
     
@@ -210,7 +195,7 @@ class ProfileController extends AbstractActionController
         $user->setUsPassword( $user->hashPassword( $data['us_password'] ) );
         $em->flush();
           
-        $this->getAuthService()->getStorage()->write( $user );
+        $this->getAuth()->getStorage()->write( $user );
         return 1;                
     }
     

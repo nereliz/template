@@ -2,36 +2,35 @@
 return [
     'controllers' => [
         'invokables' => [
-            'Admin\Controller\User' => 'Admin\Controller\UserController',
-            'Admin\Controller\Customer' => 'Admin\Controller\CustomerController',
+            'Admin\\Controller\\Users' => 'Admin\\Controller\\UsersController',
+            'Admin\\Controller\\Tenants' => 'Admin\\Controller\\TenantsController',
         ],
     ],
     // The following section is new and should be added to your file
     'router' => [
         'routes' => [
-            'administrator' => [
+            'admin_users' => [
                 'type'    => 'segment',
                 'options' => [
-                    'route'    => '/admin/user[/:action][/:username]',
+                    'route'    => '/admin/users[/:action][/:us_id]',
                     'constraints' => [
                         'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                     ],
                     'defaults' => [
-                        'controller' => 'Admin\Controller\User',
+                        'controller' => 'Admin\\Controller\\Users',
                         'action'     => 'list',
                     ],
                 ],
             ],
-            'customer' => [
+            'admin_tenants' => [
                 'type'    => 'segment',
                 'options' => [
-                    'route'    => '/admin/customer[/:action][/:customers_id]',
+                    'route'    => '/admin/tenants[/:action][/:te_id]',
                     'constraints' => [
-                        'action'       => '[a-zA-Z][a-zA-Z0-9_-]*',
-                        'customers_id' => '[0-9]+',
+                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                     ],
                     'defaults' => [
-                        'controller' => 'Admin\Controller\Customer',
+                        'controller' => 'Admin\\Controller\\Tenants',
                         'action'     => 'list',
                     ],
                 ],

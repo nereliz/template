@@ -55,36 +55,93 @@ class UsUsers
      *      )
      **/
     private $teTenants;
-                       
-    /**
-     * @ORM\OneToMany(targetEntity="UtUsertenants", mappedBy="usUser")
-     */
-    private $utUserTenants;
     
+    /**
+     * @ORM\ManyToMany(targetEntity="RpRoutingprofiles", inversedBy="usUsers")
+     * @ORM\JoinTable(name="ur_userroutingprofiles",
+     *      joinColumns={@ORM\JoinColumn(name="ur_us_id", referencedColumnName="us_id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="ur_rp_id", referencedColumnName="rp_id")}
+     *      )
+     **/
+    private $rpRoutingprofiles;
     
     public function __construct() {
         $this->teTenants = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->utUserTenants = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->rpRoutingprofiles = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
     /**
-     * Get utUserTeanants
+     * Set teTenants
      *
-     * @return Array Collection
+     * @param arrayCollection $teTenants
+     * @return UsUsers
      */
-    public function getUtUserTenants()
+    public function setTeTenants($teTenants)
     {
-        return $this->utUserTenants;
+        $this->teTenants = $teTenants;
+
+        return $this;
     }
     
     /**
-     * Get utUserTeanants
+     * Get teTeanants
      *
-     * @return Array Collection
+     * @return ArrayCollection
      */
     public function getTeTenants()
     {
         return $this->teTenants;
+    }
+    
+    /**
+     * Get names of user tenants. Array structure $id => $name;
+     *
+     * @return Array
+     */
+    public function getTeTenantNames()
+    {
+        $names = array();
+        foreach( $this->teTenants as $tenant )
+            $names[ $tenant->getTeId() ] = $tenant->getTeName();
+            
+        return $names;
+    }
+    
+    /**
+     * Set rpRoutingprofiles
+     *
+     * @param arrayCollection $rpRoutingprofiles
+     * @return UsUsers
+     */
+    public function setRpRoutingprofiles($rpRoutingprofiles)
+    {
+        $this->rpRoutingprofiles = $rpRoutingprofiles;
+
+        return $this;
+    }
+    
+    /**
+     * Get rpRoutingprofiles
+     *
+     * @return ArrayCollection
+     */
+    public function getRpRoutingprofiles()
+    {
+        return $this->rpRoutingprofiles;
+    }
+    
+    /**
+     * Get names of user tenants. Array structure $id => $name;
+     *
+     * @return Array
+     */
+    public function getRpRoutingprofilesNames()
+    {
+        $names = array();
+        foreach( $this->rpRoutingprofiles as $rprofile )
+            $names[ $rprofile->getRpId() ] = $rprofile->getRpName();
+            
+        return $names;
     }
 
     /**
@@ -172,7 +229,7 @@ class UsUsers
      * @param UpUserprofiles $upUserprofile
      * @return UsUsers
      */
-    public function setUpUserprofile($upUserporfile)
+    public function setUpUserprofile($upUserprofile)
     {
         $this->upUserprofile = $upUserprofile;
 
@@ -194,7 +251,7 @@ class UsUsers
         if( strtolower( $hash ) == "md5" )
             $password = md5( $password );
         else if( strtolower( $hash ) == "plain" )
-            $password = md5( $password );
+            $password = $password;
         else
             throw new \Exception( "'$hash' HASH METHOD IS UNKNOWN" );
        

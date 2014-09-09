@@ -16,8 +16,8 @@
 					</li>
                {else}
 					{if $idty->getUpUserprofile()->getUpid() == 1}
-						<li>
-							<a href="{$this->url('home')}">{$this->translate( 'Administrator' )}</span></a>
+						<li {if $module_name == 'Admin' }class="active"{/if}>
+							<a href="{$this->url( 'admin_users', [ 'action'=> 'list' ])}">{$this->translate( 'Administrator' )}</span></a>
 						</li>	
 					{/if}
                {/if}
@@ -33,12 +33,12 @@
 				   </li>
                </ul>
 			{/if}
-			{if $auth->hasIdentity() && count( $idty->getTeTenants() )}
+			{if isset( $aTenants ) && count( $aTenants )}
 				<form class="navbar-form navbar-right" style="margin-right: 0px;">
 					<div class="form-group">
 						<select class="form-control" id="main_te">
-							{foreach $idty->getTeTenants() as $tenant}
-								<option value="{$tenant->getTeId()}">{$tenant->getTeName()}</option>
+							{foreach $aTenants as $idx => $name}
+								<option value="{$idx}">{$name}</option>
 							{/foreach}
 						</select>
 					</div>
@@ -49,5 +49,4 @@
 
 <script type="text/javascript">
 	$( "#main_te" ).chosen();
-	console.log( "done" );
 </script>

@@ -15,6 +15,7 @@
     ->appendStylesheet( "`$basePath`/css/bootstrap-theme.min.css" )
 	->appendStylesheet( "`$basePath`/css/bootstrap-sticky-footer.css" )
     ->appendStylesheet( "`$basePath`/css/chosen.min.css" )
+	->appendStylesheet( "`$basePath`/css/jquery.dataTables.min.css" )
     ->appendStylesheet( "`$basePath`/css/style.css" )}
 
 <!-- Scripts -->
@@ -23,4 +24,5 @@
     ->appendFile( "`$basePath`/js/bootstrap.min.js" )   
     ->appendFile( "`$basePath`/js/bootbox.min.js" )  
     ->appendFile( "`$basePath`/js/chosen.jquery.min.js" )
+	->appendFile( "`$basePath`/js/jquery.dataTables.min.js" )
     ->appendFile( "`$basePath`/js/ngn.js" )}

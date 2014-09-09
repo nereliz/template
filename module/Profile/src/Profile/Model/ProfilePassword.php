@@ -5,7 +5,7 @@ use Zend\Form\Annotation;
   
 /**
  * @Annotation\Hydrator("Zend\Stdlib\Hydrator\ObjectProperty")
- * @Annotation\Name("User")
+ * @Annotation\Name("ProfilePassword")
  */
 class ProfilePassword
 {

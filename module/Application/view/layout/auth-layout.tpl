@@ -1,4 +1,7 @@
 {$identity = $this->identity()}
+{$module_name = substr( $this->ngnview()->getController(), 0, strpos( $this->ngnview()->getController(), "\\" ) )}
+{$lmodule_name = strtolower($module_name)}
+
 <html lang="en">
   <head>
 	{include file="`$smarty.current_dir`/head.tpl"}
@@ -25,11 +28,19 @@
 			{/if}
         </div>
     </div>
+	
+	{$lmenu_path = "`$smarty.current_dir`/../../../`$module_name`/view/`$lmodule_name`/menu-left.tpl"}
 
-   {$this->content}
+    {if file_exists($lmenu_path)}
+   		{include file=$lmenu_path}
+	{/if}
+    {$this->content}
 
-
-    </div> <!-- /container -->
+	{if file_exists($lmenu_path)}
+		</div>
+		</div>
+		</div>
+	{/if}
 
 	<div class="footer">
       <div class="container">

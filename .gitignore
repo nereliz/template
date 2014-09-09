@@ -1,2 +1,3 @@
 /data/SmartyModule/templates_c/*.php
 /data/log
+/data/DoctrineORMModule/Proxy/*.php

@@ -1,17 +1,13 @@
 <?php
 return [ 
     'doctrine' => [
-        'configuration' => [
-            'orm_default' => [
-                'proxy_dir' => 'data/DoctrineORMModule/Proxy',
-                'proxy_namespace' => 'DoctrineORMModule\\Proxy\\__CG__\\Application\\Entity'
-            ]
-        ],
         'driver' => [
             'application_entities' => [
                 'class' =>'Doctrine\\ORM\\Mapping\\Driver\\AnnotationDriver',
-                 'cache' => 'array',
-                 'paths' => array(__DIR__ . '/../src/Application/Entity'),
+                'cache' => 'array',
+                'paths' => [
+                    __DIR__ . '/../src/Application/Entity', 
+                ],
             ],                     
             'orm_default' => [
                 'drivers' => [

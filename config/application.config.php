@@ -4,12 +4,12 @@ return [
         //'ZendDeveloperTools',
         'DoctrineModule',
         'DoctrineORMModule',
-        'Profile',
+        'SmartyModule',
         'Application',
         'Auth',
         'Profile',
         'Admin',
-        'SmartyModule',
+        
     ],
     'module_listener_options' => [
         'config_glob_paths'    => [
