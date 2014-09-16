@@ -44,8 +44,9 @@
 
 	<div class="footer">
       <div class="container">
+		<br />
         <p class="text-muted">
-			&copy; 2013 - {date('Y')} by Nerijus Barauskas. All rights reserved.
+			&copy; 2014 - {date('Y')} by Nerijus Barauskas. All rights reserved.
 		</p>
       </div>
     </div>

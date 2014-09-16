@@ -10,6 +10,7 @@ use Application\ConfigAwareInterface;
 use Application\Traits\HelperTrait;
 
 use Admin\Model\Tenant;
+use Admin\Model\TenantSettings;
 
 class TenantsController extends AbstractActionController
     implements ConfigAwareInterface
@@ -24,7 +25,10 @@ class TenantsController extends AbstractActionController
     public function listAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
+        {
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
             return false;
+        }
         
         $em = $this->getEManager();
         $tenants = $em->getRepository('Application\\Entity\\TeTenants')->findAll();
@@ -42,61 +46,85 @@ class TenantsController extends AbstractActionController
     public function addAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
+        {
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
             return false;
+        }
             
         $form = $this->resolveForm();        
         if( $this->getRequest()->isPost() )
         {
-            $form->setData( $this->getRequest()->getPost() );
+            $data = $this->getRequest()->getPost();
+            $form->get( 'settings' )->setData( $data );
+            $data['settings'] = $data;
+            $form->setData( $data );
             if( $form->isValid() )
             {
                 $data = $form->getData();
                 unset( $data['submit'] );
                 
-                $user = new \Application\Entity\UsUsers();
+                $tenant = new \Application\Entity\TeTenants();
+                $pklot = new \Application\Entity\PkParkinglots();
                 
-                $tmp = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usUsername' => $data['us_username'] ] );
+                $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teName' => $data['teName'] ] );
                 if( $tmp )
                 {
-                    $form->get( 'us_username' )->setMessages( [ 'This user name already in use' ] );
+                    $form->get( 'teName' )->setMessages( [ 'This name already in use' ] );
                     return $this->finalise( [ 'form' => $form ] );
                 }
-                else
-                    $user->setUsUsername( $data['us_username'] );
                 
-                if( !$data['us_password'] )
+                $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teCode' => $data['teCode'] ] );
+                if( $tmp )
                 {    
-                    $form->get( 'us_password' )->setMessages( [ 'This value can not be empty' ] );
+                    $form->get( 'teCode' )->setMessages( [ 'This code already in use' ] );
                     return $this->finalise( [ 'form' => $form ] );
                 }
-                else
-                    $user->setUsPassword( $user->hashPassword( $data['us_password'] ) );
                 
-                $profile = $this->getEManager()->getRepository( "Application\\Entity\\UpUserprofiles" )->findOneBy( [ 'upId' => $data['up_id'] ] );
-                $user->setUpUserProfile( $profile );
-                
-                if( $data['te_ids'] )
+                foreach( $data['settings'] as $key => $value )
                 {
-                    foreach( $data['te_ids'] as $teid )
-                    {
-                        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $teid ] );
-                        if( !$user->getTeTenants()->contains( $tenant ) )
-                            $user->getTeTenants()->add( $tenant );
+                    if( substr( $key, 0, 8 ) == "limited_" )
+                    {	
+                        if( $value == "false" )
+                            $data['teMax'.substr( $key, 8 )] = -1;
+                        else
+                            $data['teMax'.substr( $key, 8 )] = $data['settings']['teMax'.substr( $key, 8 )];
                     }
                 }
-                        
-                if( $data['rp_ids'] )
-                {
-                    foreach( $data['rp_ids'] as $rpid )
-                    {
-                        $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $rpid ] );
-                        if( !$user->getRpRoutingprofiles()->contains( $rprofile ) )
-                            $user->getRpRoutingprofiles()->add( $rprofile );
-                    }
-                }
+                unset( $data['settings'] );
+                
+                $tzone = $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->findOneBy( [ 'tzId' => $data['teTimezone'] ] );
+                $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $data['rpId'] ] );
+                $clrate = $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->findOneBy( [ 'clId' => $data['clId'] ] );
+                
+                $tenant->updateFromArray( $data );                
+                $tenant->setTeTimezone( $tzone ? $tzone->getTzName() : "" );
+                $tenant->setRpRoutingprofile( $rprofile );
+                $tenant->setClClientrate( $clrate );
 
+                $pklot->updateFromArray( $data );
+                $pklot->setPkName( $tenant->getTeName() );
+                $pklot->setTeTenant( $tenant );
+                
+                $nodes = $this->getEManager()->getRepository( "Application\\Entity\\NoNodes" )->findAll();
+                if( $nodes )
+                {
+                    $key = rand( 0, count( $nodes ) - 1 );
+                    $pklot->setPkHosted( $nodes[$key]->getNoPeername() );
+                }
+                
+                $dsettings = [ 'PARKTIMEOUT' => 120, 'MAXCALLDURATION'=> 7200, 'DIALTIMEOUT' => 60 ];
+                foreach( $dsettings as $code => $value )
+                {
+                    $setting = new \Application\Entity\SeSettings();
+                    $setting->setSeCode( $code );
+                    $setting->setSeValue( $value );
+                    $setting->setTeTenant( $tenant );
+                    $this->getEManager()->persist( $setting );
+                }
+                
                 try{
-                    $this->getEManager()->persist( $user );
+                    $this->getEManager()->persist( $pklot );
+                    $this->getEManager()->persist( $tenant );
                     $this->getEManager()->flush();
                 }
                 catch( Exception $e )
@@ -106,8 +134,8 @@ class TenantsController extends AbstractActionController
                     return false;
                 }
                 
-                $this->flashmessenger()->addMessage( "User was added successfully.@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new user with id %s" , $this->getIdentity()->GetUsId(), $user->getUsId() ) );
+                $this->flashmessenger()->addMessage( "Tenant was added successfully.@success" );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new tenant with id %s" , $this->getIdentity()->GetUsId(), $tenant->getTeId() ) );
                 $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                 return true;
             }
@@ -121,90 +149,86 @@ class TenantsController extends AbstractActionController
     public function editAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-            return false;
-            
-        $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
-        if( !$user )
         {
-            $this->flashmessenger()->addMessage( "Failed to retrieve User.@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+            return false;
+        }
+            
+        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\teTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
+        if( !$tenant )
+        {
+            $this->flashmessenger()->addMessage( "Failed to retrieve Tenant.@danger" );
+            $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
             return false;
         }
 
-        $form = $this->resolveForm( $user );
+        $form = $this->resolveForm( $tenant );
 
         if( $this->getRequest()->isPost() )
         {
-            $form->setData( $this->getRequest()->getPost() );
+            $data = $this->getRequest()->getPost();
+            $form->get( 'settings' )->setData( $data );
+            $data['settings'] = $data;
+            $form->setData( $data );
             if( $form->isValid() )
             {
                 $data = $form->getData();
                 
-                if( $data['us_username'] != $user->getUsUsername() )
+                if( $data['teName'] != $tenant->getTeName() )
                 {
-                    $tmp = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usUsername' => $data['us_username'] ] );
+                    $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teName' => $data['teName'] ] );
                     if( $tmp )
                     {
-                        $form->get( 'us_username' )->setMessages( [ 'This user name already in use' ] );
+                        $form->get( 'teName' )->setMessages( [ 'This name already in use' ] );
                         return $this->finalise( [ 'form' => $form ] );
                     }
-                    $user->setUsUsername( $data['us_username'] );
                 }
                 
-                if( $data['us_password'] )
-                    $user->setUsPassword( $user->hashPassword( $data['us_password'] ) );
-                
-                if( $data['up_id'] != $user->getUpUserprofile()->getUpId() )
+                foreach( $data['settings'] as $key => $value )
                 {
-                    $profile = $this->getEManager()->getRepository( "Application\\Entity\\UpUserprofiles" )->findOneBy( [ 'upId' => $data['up_id'] ] );
-                    $user->setUpUserProfile( $profile );
-                }
-                
-                if( $data['te_ids'] )
-                {
-                    foreach( $data['te_ids'] as $teid )
-                    {
-                        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $teid ] );
-                        if( !$user->getTeTenants()->contains( $tenant ) )
-                            $user->getTeTenants()->add( $tenant );
+                    if( substr( $key, 0, 8 ) == "limited_" )
+                    {	
+                        if( $value == "false" )
+                            $data['teMax'.substr( $key, 8 )] = -1;
+                        else
+                            $data['teMax'.substr( $key, 8 )] = $data['settings']['teMax'.substr( $key, 8 )];
                     }
                 }
-                else
-                    $data['te_ids'] = array();
-                    
-                foreach( $user->getTeTenants() as $tenant )
-                    if( !in_array( $tenant->getTeId(), $data['te_ids'] ) )
-                        $user->getTeTenants()->removeElement( $tenant );
-                        
-                if( $data['rp_ids'] )
+                unset( $data['settings'] );
+                
+                $tzone = $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->findOneBy( [ 'tzId' => $data['teTimezone'] ] );
+                
+                $tenant->updateFromArray( $data );                
+                $tenant->setTeTimezone( $tzone ? $tzone->getTzName() : "" );
+                
+                if( $data['rpId'] != $tenant->getRpRoutingprofile()->getRpId() )
                 {
-                    foreach( $data['rp_ids'] as $rpid )
-                    {
-                        $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $rpid ] );
-                        if( !$user->getRpRoutingprofiles()->contains( $rprofile ) )
-                            $user->getRpRoutingprofiles()->add( $rprofile );
-                    }
+                    $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $data['rpId'] ] );
+                    $tenant->setRpRoutingprofile( $rprofile );
                 }
-                else
-                    $data['rp_ids'] = array();
-                    
-                foreach( $user->getRpRoutingprofiles() as $rprofile )
-                    if( !in_array( $rprofile->getRpId(), $data['rp_ids'] ) )
-                        $user->getRpRoutingprofiles()->removeElement( $rprofile );
+                
+                if( $data['clId'] != $tenant->getClClientrate() )
+                {
+                    $clrate = $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->findOneBy( [ 'clId' => $data['clId'] ] );
+                    $tenant->setClClientrate( $clrate );
+                }
+
+                $tenant->getPkParkinglot()->updateFromArray( $data );
+                
                 
                 try{
                     $this->getEManager()->flush();
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to edit user.@danger" );
-                    $this->redirect()->toRoute( 'administrator', [ 'action'=> 'list' ] );
+                    $this->flashmessenger()->addMessage( "Failed to edit Tenant.@danger" );
+                    $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
-                $this->flashmessenger()->addMessage( "User was edited successfully.@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited user with id %s" , $this->getIdentity()->getUsId(), $user->getUsId() ) );
-                $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                $this->flashmessenger()->addMessage( "Tenant was edited successfully.@success" );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited tenant with id %s" , $this->getIdentity()->getUsId(), $tenant->getTeId() ) );
+                $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
                 return true;
             }
         }
@@ -216,57 +240,70 @@ class TenantsController extends AbstractActionController
     public function removeAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-            return false;
-            
-        $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
-        if( !$user )
         {
-            $this->flashmessenger()->addMessage( "Failed to retrieve User.@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+            return false;
+        }
+            
+        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\teTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
+        if( !$tenant )
+        {
+            $this->flashmessenger()->addMessage( "Failed to retrieve Tenant.@danger" );
+            $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
             return false;
         }
         
         try{
-            $this->getEManager()->remove( $user );
+            $this->getEManager()->remove( $tenant );
             $this->getEManager()->flush();
         }
         catch( Exception $e )
         {
-            $this->flashmessenger()->addMessage( "Failed to remove user.@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+            $this->flashmessenger()->addMessage( "Failed to remove Tenant.@danger" );
+            $this->redirect()->toRoute( 'admin_tenents', [ 'action'=> 'list' ] );
             return false;
         }
                 
-        $this->flashmessenger()->addMessage( "User was removed successfully.@success" );
-        $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s removed user with id %s" , $this->getIdentity()->getUsId(), $this->params( 'us_id'  ) ) );
-        $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+        $this->flashmessenger()->addMessage( "Tenant was removed successfully.@success" );
+        $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "Tenant with id %s removed user with id %s" , $this->getIdentity()->getUsId(), $this->params( 'te_id'  ) ) );
+        $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
         
         return true; 
     }
         
-    private function resolveForm( $user = false )
+    private function resolveForm( $tenant = false )
     {
-        $muser = new User(); 
+        $mtenant = new Tenant(); 
+        $settings = new TenantSettings();
         $builder = new AnnotationBuilder();
-        $form    = $builder->createForm( $muser );
+        $form    = $builder->createForm( $mtenant );
+        $sform   = $builder->createForm( $settings );
+        $sform->setName( "settings" );
+        $sform->remove("submit_data");
         
         $form->setAttribute( 'method', "post" );
         $form->setAttribute( 'class', "form-horizontal" );
-        $form->setAttribute( 'action', "/admin/users/" . ( $user ? "edit/{$user->getUsId()}" : "add" ) );
-        $form->get( 'up_id' )->setValueOptions( $this->getEManager()->getRepository( "Application\\Entity\\UpUserprofiles" )->getNamesIdsList() );
-        $form->get( 'te_ids' )->setValueOptions( $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->getNamesIdsList() );
-        $form->get( 'rp_ids' )->setValueOptions( $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->getNamesIdsList() );
+        $form->setAttribute( 'action', "/admin/tenants/" . ( $tenant ? "edit/{$tenant->getTeId()}" : "add" ) );
+        $form->add( $sform );
         
-        if( $user )
+        $form->get( 'clId' )->setValueOptions( [ '' => "Do not apply call rate" ] + $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->getNamesIdsList() );
+        $form->get( 'teTimezone' )->setValueOptions( [ '' => "User server Default"] + $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->getNamesIdsList() );
+        $form->get( 'rpId' )->setValueOptions( $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->getNamesIdsList() );
+        
+        if( $tenant )
         {
-            $form->get( 'us_username' )->setValue( $user->getUsUsername() );
-            $form->get( 'up_id' )->setValue( $user->getUpUserprofile()->getUpId() );
-            $form->get( 'te_ids' )->setValue( array_keys( $user->getTeTenantNames() ) );
-            $form->get( 'rp_ids' )->setValue( array_keys( $user->getRpRoutingprofilesNames() ) );
-        }
-        else
-        {
-            $form->get( 'up_id' )->setValue( 3 );
+            $data = $tenant->toArray();
+            $form->setData( $data );
+            $form->get( 'settings' )->setData( $data );
+            $form->get( 'teCode' )->setAttribute( "readonly", "readonly" );
+            $form->get( 'pkStart' )->setValue( $tenant->getPkParkinglot()->getPkStart() );
+            $form->get( 'pkEnd' )->setValue( $tenant->getPkParkinglot()->getPkEnd() );
+            
+            if( $tenant->getTeTimezone() )
+            {
+                $tzone = $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->findOneBy( ['tzName' => $tenant->getTeTimezone() ] );
+                $form->get( 'teTimezone' )->setValue( $tzone ? $tzone->getTzId() : "" );
+            }
         }
         
         return $form;

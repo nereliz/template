@@ -19,6 +19,7 @@
 			<th>Code</th>
 			<th># Channels</th>
 			<th># Extensions</th>
+			<th># Dids</th>
 			<th>Alerts</th>
 			<th><a class="btn btn-default btn-xs have-tooltip" title="Add Tenant" href="{$this->url( 'admin_tenants',[ 'action' => 'add' ] )}"><span class="glyphicon glyphicon-plus"></span></a></th>
 		</tr>
@@ -30,6 +31,7 @@
 				<td>{$tenant->getTeCode()}</td>
 				<td>{$tenant->getTeMaxchannels()}</td>
 				<td>{count( $tenant->getExExtensions() )} / {$tenant->getTeMaxExtensions()}</td>
+				<td>{count( $tenant->getDiDids() )} / {$tenant->getTeMaxDids()}</td>
 				<td>{$tenant->getTeAlertemail()}</td>
 				<td>
 					<div class="btn-group btn-group-xs">
@@ -40,7 +42,7 @@
 			</tr>
 		{foreachelse}
             <tr>
-                <td colspan="6" style="align: center">Where are no records to show</td>
+                <td colspan="7" style="align: center">Where are no records to show</td>
             </tr>
 		{/foreach}
 	</tbody>
@@ -57,6 +59,7 @@ $( document ).ready( function() {
 		'aoColumns': [
     	    null,
         	null,
+			null,
 			null,
     	    null,
 			null,

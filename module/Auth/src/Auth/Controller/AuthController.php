@@ -97,11 +97,13 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
                         $this->getAuthService()->setStorage( $this->getSessionStorage() );
                     }
                     $this->getAuthService()->getStorage()->write( $result->getIdentity() );
+                    $this->setDefaultTenant();
+                    
                     $this->flashmessenger()->addMessage( "You've been logged in@success" );
-                    return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                    return $this->redirect()->toRoute( 'config_ivrs', [ 'action'=> 'index' ] );
                 }
                 $this->flashmessenger()->addMessage( "Wrong username or password.@danger" );
-                return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
             }
         }
         return $this->forward()->dispatch( 'Auth\\Controller\\Auth', array( 'action' => 'login' ) );
@@ -114,5 +116,39 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
     
         $this->flashmessenger()->addMessage("You've been logged out@success");
         return $this->redirect()->toRoute( 'login' );
+    }
+    
+    public function defaultTenantAction()
+    {    
+    
+        $dTenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $_POST['te_id'] ] );
+        if( !$dTenant )
+        {
+            $this->flashmessenger()->addMessage( "Tenant not found1.@danger" );
+            return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
+        }
+        
+        $idty = $this->getIdentity();
+        if( $idty )
+        {
+            if( $idty->getUpUserprofile()->getUpId() != 1 )
+                $aTenatns = $idty->getTeTenantNames();
+            else
+                $aTenants = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->getNamesIdsList();
+        }
+        else
+            $aTenants = array();
+        
+        if( array_key_exists( $dTenant->getTeId(), $aTenants ) )                                                                                                    
+        {
+            $this->setDefaultTenant( $dTenant );
+            $this->flashmessenger()->addMessage( "Current tenant is switced to {$dTenant->getTeName()}.@success" );
+            return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
+        }
+        else
+        {
+            $this->flashmessenger()->addMessage( "Tenant not found2.@danger" );
+            return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );   
+        }
     }        
 }

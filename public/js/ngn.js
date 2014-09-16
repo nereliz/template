@@ -9,6 +9,54 @@ $( 'document' ).ready( function(){
     $( ".alert" ).alert();
     
     $( ".have-tooltip" ).tooltip( { html: true, delay: { show: 300, hide: 100  } } );
+    
+    $( "input:radio.radio-inline" ).each( function( item ){   
+          var parent = $( this ).parent();
+          if( parent.is( 'label' ) && !parent.hasClass( "radio-inline" ) )
+              parent.addClass( "radio-inline" );
+    });
+    
+    $( "input:radio.radio" ).each( function( item ){
+        var parent = $( this ).parent();
+        if( parent.parent().is( 'div' ) && !parent.parent().hasClass( "radio" ) ) {
+            parent.parent().append( '<div class="radio"><labe>' + parent.html() + '</label></dv>' );
+            parent.remove();
+        }
+    });
+    
+    $( "input:checkbox.checkbox-inline" ).each( function( item ){   
+          var parent = $( this ).parent();
+          if( parent.is( 'label' ) && !parent.hasClass( "checkbox-inline" ) )
+              parent.addClass( "checkbox-inline" );
+    });
+    
+    $( "input:checkbox.checkbox" ).each( function( item ){
+        var parent = $( this ).parent();
+        if( parent.parent().is( 'div' ) && !parent.parent().hasClass( "checkbox" ) ) {
+            parent.parent().append( '<div class="checkbox"><labe>' + parent.html() + '</label></dv>' );
+            parent.remove();
+        }
+    });
+    
+    $( "select.asm-select" ).asmSelect({
+      sortable: true,
+      animate: true,
+      addItemTarget: 'bottom',
+      removeLabel: '<span class="glyphicon glyphicon-trash"></span>'
+    });
+    
+    $( "select.chosen" ).each( function( item ){
+        if( $( this ).is( ":visible" ) )
+          $( this ).chosen();
+        else
+          $( this ).chosen({width: "100\%"});
+    });
+    
+    $( ".with-popover" ).each( function( item ){
+        $( this ).popover();
+    });
+    
+    
 });
 
 function genPassword(n){

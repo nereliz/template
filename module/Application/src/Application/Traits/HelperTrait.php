@@ -16,6 +16,11 @@ trait HelperTrait{
         return $this->authservice;
     }
     
+    public function getSession()
+    {
+        return $this->getServiceLocator()->get( 'Zend\\Session\\SessionManager' );
+    }
+    
     public function setConfig( $config )
     {
         $this->config = $config;
@@ -38,6 +43,38 @@ trait HelperTrait{
     {
         return $this->getServiceLocator()->get( 'Doctrine\\ORM\\EntityManager' );
     }
+    
+    public function setDefaultTenant( $tenant = false )
+    {
+        $defaults = new \Zend\Session\Container( 'defaults' );
+        
+        if( $tenant )
+        {
+            $defaults->tenant = $tenant;
+        }
+        else
+        {
+            $idty = $this->getIdentity();
+            if( $idty && $idty->getUpUserprofile()->getUpId() != 1 )
+                $defaults->tenant = $idty->getTeTenants()[0];
+            else
+                $defaults->tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findAll()[0];
+        }
+        
+        return $defaults->tenant;            
+    }
+    
+    public function getDefaultTenant()
+    {
+        $defaults = new \Zend\Session\Container( 'defaults' );
+        
+        if( $defaults && $defaults->tenant )
+            $tenant = $defaults->tenant;
+        else 
+            $tenant = $this->setDefaultTenant();
+            
+        return $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $tenant->getTeId() ] );
+    }
                         
     
     public function finalise( $data )
@@ -53,8 +90,9 @@ trait HelperTrait{
         }
         else 
             $aTenants = array();
-            
-        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $idty, 'aTenants' => $aTenants ];
+        
+        $dtenant = $this->getDefaultTenant();
+        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $idty, 'aTenants' => $aTenants, 'dTenant' => $dtenant ];
     }
     
     /**

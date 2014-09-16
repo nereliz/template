@@ -15,10 +15,13 @@
 						<a href="{$this->url('home')}" data-toggle="tooltip" title="{$this->translate( 'Home' )}"><span class="glyphicon glyphicon-home"></span></a>
 					</li>
                {else}
+					<li {if $module_name == 'Config' }class="active"{/if}>
+						<a href="{$this->url( 'config_ivrs', [ 'action'=> 'list' ])}">{$this->translate( 'Configurations' )}</span></a>
+					</li>
 					{if $idty->getUpUserprofile()->getUpid() == 1}
 						<li {if $module_name == 'Admin' }class="active"{/if}>
 							<a href="{$this->url( 'admin_users', [ 'action'=> 'list' ])}">{$this->translate( 'Administrator' )}</span></a>
-						</li>	
+						</li>
 					{/if}
                {/if}
            </ul>
@@ -33,12 +36,12 @@
 				   </li>
                </ul>
 			{/if}
-			{if isset( $aTenants ) && count( $aTenants )}
-				<form class="navbar-form navbar-right" style="margin-right: 0px;">
+			{if isset( $aTenants ) && count( $aTenants ) > 1 }
+				<form class="navbar-form navbar-right" method="post" action="{$this->url( 'auth', [ 'action' => 'default_tenant'] )}" id="top_menu_def_tenant" style="margin-right: 0px;">
 					<div class="form-group">
-						<select class="form-control" id="main_te">
+						<select class="form-control chosen" id="def_te_id" name="te_id">
 							{foreach $aTenants as $idx => $name}
-								<option value="{$idx}">{$name}</option>
+								<option value="{$idx}" {if $idx == $dTenant->getTeId()}selected="selected"{/if}>{$name}</option>
 							{/foreach}
 						</select>
 					</div>
@@ -48,5 +51,7 @@
         </div><!--/.nav-collapse -->
 
 <script type="text/javascript">
-	$( "#main_te" ).chosen();
+	$( '#def_te_id' ).on( "change", function( event ){
+		$( '#top_menu_def_tenant' ).submit();
+	});
 </script>

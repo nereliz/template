@@ -40,9 +40,15 @@ class RpRoutingprofiles
      * @ORM\ManyToMany( targetEntity="UsUsers", mappedBy="rpRoutingprofiles")
      **/
     private $usUsers;
+    
+    /**
+      * @ORM\OneToMany(targetEntity="TeTenants", mappedBy="rpRoutingprofile")
+      */
+    private $teTenants;
 
     public function __construct() {
         $this->usUsers = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->teTeants = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
     /**
@@ -66,6 +72,29 @@ class RpRoutingprofiles
     public function getUsUsers()
     {  
         return $this->usUsers;
+    }
+    
+    /**
+     * Set teTenants
+     *
+     * @param arrayCollection $teTenants
+     * @return RpRoutingProfiles
+     */
+    public function setTeTenants($teTenants)
+    {
+        $this->teTenants = $teTenants;
+
+        return $this; 
+    }  
+
+    /**
+     * Get teTenants
+     *
+     * @return ArrayCollection
+     */
+    public function getTeTenants()
+    {  
+        return $this->teTenants;
     }
 
 

@@ -39,7 +39,7 @@ return [
     ],
     'view_manager' => [
         'template_path_stack' => [
-            'admin' => __DIR__ . '/../view',
+            'config' => __DIR__ . '/../view',
         ],
     ],
 ];

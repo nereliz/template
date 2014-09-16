@@ -14,7 +14,7 @@ class IndexController extends AbstractActionController
     public function indexAction()
     {
         if( $this->getAuth()->hasIdentity() )
-            $this->redirect()->toRoute( 'profile', [ 'action' => 'index' ] );
+            $this->redirect()->toRoute( 'config_ivrs', [ 'action' => 'index' ] );
         else
             $this->redirect()->toRoute( 'auth', [ 'action' => 'login' ] );
     }

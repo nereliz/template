@@ -45,7 +45,10 @@ class UsersController extends AbstractActionController
     public function addAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
+        {
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
             return false;
+        }
             
         $form = $this->resolveForm();        
         if( $this->getRequest()->isPost() )
@@ -124,7 +127,10 @@ class UsersController extends AbstractActionController
     public function editAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
+        {
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
             return false;
+        }
             
         $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
         if( !$user )
@@ -201,7 +207,7 @@ class UsersController extends AbstractActionController
                 catch( Exception $e )
                 {
                     $this->flashmessenger()->addMessage( "Failed to edit user.@danger" );
-                    $this->redirect()->toRoute( 'administrator', [ 'action'=> 'list' ] );
+                    $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
@@ -219,7 +225,10 @@ class UsersController extends AbstractActionController
     public function removeAction()
     {
         if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
+        {
+            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
             return false;
+        }
             
         $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
         if( !$user )

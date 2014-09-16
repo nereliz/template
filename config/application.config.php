@@ -9,6 +9,7 @@ return [
         'Auth',
         'Profile',
         'Admin',
+        'Config'
         
     ],
     'module_listener_options' => [

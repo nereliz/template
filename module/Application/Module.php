@@ -9,6 +9,8 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Auth\Model\DoctrineAuthAdapter;
 
 use Auth\Model\AuthStorage;
+use Zend\Session\SessionManager;
+use Zend\Session\Container;
 
 class Module
 {
@@ -63,6 +65,19 @@ class Module
         $e->getApplication()->getServiceManager()->get( 'viewhelpermanager' )->setFactory( 'ngnview', function( $sm ) use ( $e ) {
              return new View\Helper( $e->getRouteMatch() );
         });
+    }
+    
+    public function bootstrapSession($e)
+    {
+        $session = $e->getApplication()->getServiceManager()->get('Zend\\Session\\SessionManager');
+        $session->start();
+
+        $container = new Container('initialized');
+        if( !isset( $container->init ) )
+        {
+            $session->regenerateId(true);
+            $container->init = 1;
+        }
     }
 
     public function getConfig()
@@ -139,11 +154,9 @@ class Module
 
                     return $logger;
                 },
-                'Auth\\Model\\AuthStorage' => function( $sm )
-                {
+                'Auth\\Model\\AuthStorage' => function( $sm ){
                     return new \Auth\Model\AuthStorage( 'asterisk' );  
                 },
-
                 'AuthService' => function($sm) {
                     //My assumption, you've alredy set dbAdapter
                     //and has users table with columns : user_name and pass_word
@@ -155,6 +168,54 @@ class Module
                     $authService->setStorage( $sm->get( 'Auth\\Model\\AuthStorage' ) );
 
                     return $authService;
+                },
+                'Zend\\Session\\SessionManager' => function ($sm) {
+                    $config = $sm->get('config');
+                    if( isset( $config['session'] ) )
+                    {
+                        $session = $config['session'];
+                
+                        $sessionConfig = null;
+                        if( isset( $session['config'] ) )
+                        {
+                            $class = isset($session['config']['class'])  ? $session['config']['class'] : 'Zend\\Session\\Config\\SessionConfig';
+                            $options = isset($session['config']['options']) ? $session['config']['options'] : [];
+                            $sessionConfig = new $class();
+                            $sessionConfig->setOptions($options);
+                        }
+                
+                        $sessionStorage = null;
+                        if( isset( $session['storage'] ) )
+                        {
+                            $class = $session['storage'];
+                            $sessionStorage = new $class();
+                        }
+                
+                        $sessionSaveHandler = null;
+                        if( isset( $session['save_handler'] ) )
+                        {
+                            // class should be fetched from service manager since it will require constructor arguments
+                            $sessionSaveHandler = $sm->get( $session['save_handler'] );
+                        }
+                
+                        $sessionManager = new SessionManager( $sessionConfig, $sessionStorage, $sessionSaveHandler );
+                
+                        if( isset( $session[ 'validator' ] ) )
+                        {
+                            $chain = $sessionManager->getValidatorChain();
+                            foreach( $session['validator'] as $validator )
+                            {
+                                $validator = new $validator();
+                                $chain->attach('session.validate', [ $validator, 'isValid'] );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $sessionManager = new SessionManager();
+                    }
+                    Container::setDefaultManager( $sessionManager );
+                    return $sessionManager;
                 },
             ],
         ];
