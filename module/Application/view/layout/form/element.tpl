@@ -2,14 +2,14 @@
 {if $element->getAttribute( 'type' ) != 'checkbox' && $element->getAttribute( 'type' ) != 'hidden' && $element->getAttribute( 'type' ) != 'radio'}
 
 <div class="form-group {if $this->formElementErrors( $element )}has-error{/if}">
-    <label class="control-label col-lg-4">{$element->getLabel()}</label>
+    <label class="control-label col-lg-4">{include file="eval:{$element->getLabel()}"}</label>
     <div class="col-lg-8">
-        {$this->formElement( $element )}
+        {include file="eval:{$this->formElement( $element )}"}
         {if $this->formElementErrors( $element )} 
             <span class="help-inline text-danger">
                 <ul class="list-unstyled">
                     {foreach $element->getMessages() as $error }
-                        <li>{$error}</li>
+                        <li>{include file="eval:{$error}"}</li>
                     {/foreach}
                 </ul>
             </span>
@@ -24,13 +24,13 @@
     <div class="col-lg-8">
         <div class="checkbox">
             <label>
-                {$this->formElement( $element )}{$element->getLabel()}
+                {include file="eval:{$this->formElement( $element )}"}{include file="eval:{$element->getLabel()}"}
             </label>
             {if $this->formElementErrors( $element )} 
                 <span class="help-inline text-danger">
                     <ul class="list-unstyled">
                     {foreach $element->getMessages() as $error }
-                        <li>{$error}</li>
+                        <li>{include file="eval:{$error}"}</li>
                     {/foreach}
                     </ul>
                 </span>
@@ -42,14 +42,14 @@
 {elseif $element->getAttribute( 'type' ) == 'radio'}
 
 <div class="form-group">
-	<label class="control-label col-lg-4">{$element->getLabel()}</label>
+    <label class="control-label col-lg-4">{include file="eval:{$element->getLabel()}"}</label>
     <div class="col-lg-8">
-        {$this->formElement( $element )}
+        {include file="eval:{$this->formElement( $element )}"}
         {if $this->formElementErrors( $element )} 
            <span class="help-inline text-danger">
                 <ul class="list-unstyled">
                 {foreach $element->getMessages() as $error }
-                   <li>{$error}</li>
+                   <li>{include file="eval:{$error}"}</li>
                 {/foreach}
                 </ul>
             </span>
@@ -59,14 +59,14 @@
 {elseif $element->getAttribute( 'type' ) == 'multicheckbox'}
 
 <div class="form-group">
-	<label class="control-label col-lg-4">{$element->getLabel()}</label>
+	<label class="control-label col-lg-4">{include file="eval:{$element->getLabel()}"}</label>
     <div class="col-lg-8">
-        {$this->formElement( $element )}
+        {include file="eval:{$this->formElement( $element )}"}
         {if $this->formElementErrors( $element )} 
            <span class="help-inline text-danger">
                 <ul class="list-unstyled">
                 {foreach $element->getMessages() as $error }
-                   <li>{$error}</li>
+                   <li>{include file="eval:{$error}"}</li>
                 {/foreach}
                 </ul>
             </span>
@@ -74,7 +74,6 @@
     </div>
 </div>
 {elseif $element->getAttribute( 'type' ) == 'hidden'}
-
     {$this->formElement( $element )}
 
 {/if}

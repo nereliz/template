@@ -60,8 +60,8 @@ while($("#" + options.containerClass + index).size() > 0) index++;
 
 $select = $("<select></select>")
 .addClass(options.selectClass)
-.attr('name', options.selectClass + index)
-.attr('id', options.selectClass + index); 
+.attr('name', options.selectClass.replace(/\s/g, "-") + index)
+.attr('id', options.selectClass.replace( "-", "_" ).replace(/\s/g, "_") + index); 
 
 $selectRemoved = $("<select></select>"); 
 
@@ -251,10 +251,11 @@ return group;
 function selectFirstItem() {
 
 // select the firm item from the regular select that we created
-if( $select.children().children(":eq(0)") )
-  $select.children().children(":eq(0)").attr("selected", true); 
-else
+if( $select.children(":eq(0)") )
   $select.children(":eq(0)").attr("selected", true); 
+else if( $select.children().children(":eq(0)") )
+  $select.children().children(":eq(0)").attr("selected", true);
+  
 }
 
 function disableSelectOption($option) {
@@ -269,6 +270,8 @@ $option.addClass(options.optionDisabledClass)
 
 if(options.hideWhenAdded) $option.hide();
 if($.browser.msie) $select.hide().show(); // this forces IE to update display
+if( $option.closest( "select" ).hasClass( "chosen" ) )
+  $option.closest( "select" ).trigger( "chosen:updated" );
 }
 
 function enableSelectOption($option) {
@@ -280,6 +283,9 @@ $option.removeClass(options.optionDisabledClass)
 
 if(options.hideWhenAdded) $option.show();
 if($.browser.msie) $select.hide().show(); // this forces IE to update display
+
+if( $option.closest( "select" ).hasClass( "chosen" ) )
+  $option.closest( "select" ).trigger( "chosen:updated" );
 }
 
 function addListItem(optionId) {
@@ -298,9 +304,13 @@ dropListItem($(this).parent('li').attr('rel'));
 return false; 
 }); 
 
+var label = $O.html();
+if( $O.parent().is('optgroup') )
+ label = $O.parent().attr( "label" ) + ": " + label;
+
 var $itemLabel = $("<span></span>")
 .addClass(options.listItemLabelClass)
-.html($O.html()); 
+.html(label); 
 
 var $item = $("<li></li>")
 .attr('rel', optionId)

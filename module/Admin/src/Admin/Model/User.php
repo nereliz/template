@@ -15,7 +15,7 @@ class User
      * @Annotation\Required({"required":"true" })
      * @Annotation\Filter({"name":"StripTags"})
      * @Annotation\Filter({"name":"StringTrim"})
-     * @Annotation\Options({"label":"Username:"})
+     * @Annotation\Options({"label":"{t}Username{/t}:"})
      */
     public $us_username;
 
@@ -26,7 +26,7 @@ class User
      * @Annotation\Filter({"name":"StripTags"})
      * @Annotation\Filter({"name":"StringTrim"})
      * @Annotation\Validator({"name":"StringLength", "options": {"min":6}})
-     * @Annotation\Options({"label":"Password:"})
+     * @Annotation\Options({"label":"{t}Password{/t}:"})
      */
     public $us_password;
     
@@ -34,7 +34,7 @@ class User
      * @Annotation\Type("Zend\Form\Element\Select")
      * @Annotation\Attributes({"class":"form-control", "id":"profile"})
      * @Annotation\Required({"required":"true" })
-     * @Annotation\Options({"label":"User Profile:"})
+     * @Annotation\Options({"label":"{t}User Profile{/t}:"})
      */
     public $up_id;
     
@@ -42,7 +42,7 @@ class User
      * @Annotation\Type("Zend\Form\Element\Select")
      * @Annotation\Attributes({"class":"form-control", "id":"tenants", "multiple":"multiple"})
      * @Annotation\AllowEmpty({"allow_empty":"true" })
-     * @Annotation\Options({"label":"Tenants:"})
+     * @Annotation\Options({"label":"{t}Tenants{/t}:"})
      */
     public $te_ids;
     
@@ -50,13 +50,13 @@ class User
      * @Annotation\Type("Zend\Form\Element\Select")
      * @Annotation\Attributes({"class":"form-control", "id":"routing_profiles", "multiple":"multiple"})
      * @Annotation\AllowEmpty({"allow_empty":"true" })
-     * @Annotation\Options({"label":"Routing Profiles:"})
+     * @Annotation\Options({"label":"{t}Routing Profiles{/t}:"})
      */
     public $rp_ids;
 
     /**
      * @Annotation\Type("Zend\Form\Element\Submit")
-     * @Annotation\Attributes({"name":"submit_data","value":"Submit","class":"btn btn-primary", "id":"submit_profile_data"})
+     * @Annotation\Attributes({"name":"submit_data","value":"{t}Submit{/t}","class":"btn btn-primary", "id":"submit_profile_data"})
      */
     public $submit;
 }

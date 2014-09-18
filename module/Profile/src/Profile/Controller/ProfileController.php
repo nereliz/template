@@ -49,22 +49,22 @@ class ProfileController extends AbstractActionController
                     switch( $result )
                     {
                         case 1:
-                            $this->flashmessenger()->addMessage( "Username updated successfully.@success" );
+                            $this->flashmessenger()->addMessage( "{t}Username updated successfully.{/t}@success" );
                             return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
                             break;
 
                         case 2:
-                            $dataForm->get( 'conf_password' )->setMessages( [ "Invalid Password." ] );
+                            $dataForm->get( 'conf_password' )->setMessages( [ "{t}Invalid Password.{/t}" ] );
                             $dataForm->get( 'conf_password' )->setValue( "" );
                             break;
 
                         case 3:
-                            $dataForm->get( 'us_username' )->setMessages( [ "This username is already in use." ] );
+                            $dataForm->get( 'us_username' )->setMessages( [ "{t}This username is already in use.{/t}" ] );
                             $dataForm->get( 'conf_password' )->setValue( "" );
                             break;
 
                         default:
-                            $this->flashmessenger()->addMessage( "Unexpected erro occured please try again later.@danger" );
+                            $this->flashmessenger()->addMessage( "{t}Unexpected erro occured please try again later.{/t}@danger" );
                             return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
                             break;
                     }
@@ -83,27 +83,27 @@ class ProfileController extends AbstractActionController
                     switch( $result )
                     {
                         case 1:
-                            $this->flashmessenger()->addMessage( "Password updated successfully.@success" );
+                            $this->flashmessenger()->addMessage( "{t}Password updated successfully.{/t}@success" );
                             return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
                             break;
 
                         case 2:
-                            $pwdForm->get( 'conf_password' )->setMessages( [ "Invalid Password." ] );
+                            $pwdForm->get( 'conf_password' )->setMessages( [ "{t}Invalid Password.{/t}" ] );
                             $pwdForm->get( 'conf_password' )->setValue( "" );
                             $pwdForm->get( 'us_password' )->setValue( "" );
                             $pwdForm->get( 'ret_password' )->setValue( "" );
                             break;
 
                         case 3:
-                            $pwdForm->get( 'us_password' )->setMessages( [ "Passwords doesn't match" ] );
-                            $pwdForm->get( 'ret_password' )->setMessages( [ "Passwords doesn't match" ] );
+                            $pwdForm->get( 'us_password' )->setMessages( [ "{t}Passwords doesn't match{/t}" ] );
+                            $pwdForm->get( 'ret_password' )->setMessages( [ "{t}Passwords doesn't match{/t}" ] );
                             $pwdForm->get( 'conf_password' )->setValue( "" );
                             $pwdForm->get( 'us_password' )->setValue( "" );
                             $pwdForm->get( 'ret_password' )->setValue( "" );
                             break;
 
                         default:
-                            $this->flashmessenger()->addMessage( "Unexpected erro occured please try again later.@danger" );
+                            $this->flashmessenger()->addMessage( "{t}Unexpected erro occured please try again later.{/t}@danger" );
                             return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
                             break;
                     }

@@ -5,7 +5,7 @@
         {$type = substr( $message, $pos + 1 , strlen( $message ) )}
 
         <div class="alert alert-{$type}">
-            {$msg}
+            {include file="eval:{$msg}"}
             <a class="close" href="#" data-dismiss="alert">×</a>
         </div>
     {/foreach}

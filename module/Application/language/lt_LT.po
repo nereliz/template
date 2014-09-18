@@ -1,0 +1,59 @@
+msgid "Home"
+msgstr "Namai"
+
+msgid "Configurations"
+msgstr "Konifguravimas"
+
+msgid "Administrator"
+msgstr "Administravimas"
+
+msgid "Profile"
+msgstr "Profilis"
+
+msgid "Log Out"
+msgstr "Atsijungti"
+
+msgid "Edit"
+msgstr "Redaguot"
+
+msgid "Remove"
+msgstr "Pašalinti"
+
+msgid "Add New"
+msgstr "Prodėti Nauja"
+
+msgid "Cancel"
+msgstr "Atšaukti"
+
+msgid "Are you shure?"
+msgstr "Ar tikrai?"
+
+msgid "Are you shure you want to delete selected object?"
+msgstr "Ar tikrai norite pašalinti šį objektą?"
+
+msgid "Where are no records to show"
+msgstr "Nerasta jokių įrašų"
+
+msgid "Unlimited"
+msgstr "Be apribojimų"
+
+msgid "Name"
+msgstr "Vardas"
+
+msgid "Code"
+msgstr "Kodas"
+
+msgid "Status"
+msgstr "Statusas"
+
+msgid "Enabled"
+msgstr "Įgalintas"
+
+msgid "Disabled"
+msgstr "Apribotas"
+
+msgid "General"
+msgstr "Bendras"
+
+msgid "Settings"
+msgstr "Nustatymai"

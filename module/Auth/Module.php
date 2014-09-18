@@ -7,7 +7,7 @@ use Zend\Authentication\AuthenticationService;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\Authentication\Adapter\DbTable as DbTableAuthAdapter;
 
-use \Auth\Model\AuthStorage;
+use Auth\Model\AuthStorage;
 
 class Module
 {

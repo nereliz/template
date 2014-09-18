@@ -63,6 +63,7 @@ class Gettext implements FileLoaderInterface
             ), 0, $error);
         }
 
+        
         // Verify magic number
         $magic = fread($this->file, 4);
 

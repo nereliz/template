@@ -1,8 +1,7 @@
-{$title = 'Login'}
-{$this->headTitle( $title )}
 
 <div class="page-header">
-	<h1>{$this->escapeHtml( $title )}</h1>
+    <h1>{t}Login{/t}</h1>
+    {$this->headTitle( $this->translate('Login') )}
 </div>
 
 {include file=$config['template']['layout/messages']}
@@ -14,7 +13,7 @@
 {$form = $this->form}
 {$this->form()->openTag( $form )}
 {foreach $form->getElements() as $element}
-	{include file=$config['template']['form/element'] element=$element}
+    {include file=$config['template']['form/element'] element=$element}
 {/foreach}
 
 {$this->form()->closeTag()}

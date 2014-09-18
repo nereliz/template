@@ -1,14 +1,12 @@
-{$title = 'Add User'}
-{$this->headTitle( $title )}
-
 <div class="page-header">
 <div class="container-fluid">
-	<h2>
-		<div class="pull-right">
-        	<a class="btn btn-default btn-sm have-tooltip" title="Go back" href="{$this->url( 'admin_users', [ 'action'=> 'list' ] )}"><span class="glyphicon glyphicon-arrow-left"></span></a>
-    	</div>
-		{$this->escapeHtml( $title )}
-	</h2>
+    <h2>
+        <div class="pull-right">
+            <a class="btn btn-default btn-sm have-tooltip" title="Go back" href="{$this->url( 'admin_users', [ 'action'=> 'list' ] )}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+        </div>
+        {t}Add User{/t}
+	{$this->headTitle( $this->translate( 'Add User' ) )}
+    </h2>
 </div>
 </div>
 
@@ -26,7 +24,7 @@
 {$this->form()->openTag( $form )}
 
 {foreach $form as $element }
-	{include file=$config['template']['form/element'] element=$element}
+    {include file=$config['template']['form/element'] element=$element}
 {/foreach}
 
 {$this->form()->closeTag()} 
@@ -43,8 +41,8 @@
     $( "#tenants" ).chosen();
     $( "#routing_profiles" ).chosen();
 
-	$( "#password" ).val( genPassword( 8 ) );  
-	$( "#password" ).parent( ).addClass( 'has-feedback' );
+    $( "#password" ).val( genPassword( 8 ) );  
+    $( "#password" ).parent( ).addClass( 'has-feedback' );
     $( "#password" ).parent( ).append( '<span id="gen_password" class="glyphicon glyphicon-refresh form-control-feedback" style="cursor: pointer" ></span>' );
 
     $( "#gen_password" ).on( "click", function(){

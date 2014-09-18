@@ -80,16 +80,15 @@ return [
             ],
         ],
     ],
+    'aliases' => [
+        'translator' => 'MvcTranslator',
+    ],
     'service_manager' => [
         'factories' => [
-            'translator' => 'Zend\\I18n\\Translator\\TranslatorServiceFactory',
-        ],
-        'services' => [
-            'session' => new Zend\Session\Container( 'ngn_portal' ),
+            'translator' => 'Zend\\Mvc\\Service\\TranslatorServiceFactory',
         ],
     ],
     'translator' => [
-        'locale' => 'en_US',
         'translation_file_patterns' => [
             [
                 'type'     => 'gettext',

@@ -107,13 +107,13 @@ class UsersController extends AbstractActionController
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to add user.@danger" );
+                    $this->flashmessenger()->addMessage( "Failed to add User.@danger" );
                     $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
                 $this->flashmessenger()->addMessage( "User was added successfully.@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new user with id %s" , $this->getIdentity()->GetUsId(), $user->getUsId() ) );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new user with id %s" , $this->getIdentity()->getUsId(), $user->getUsId() ) );
                 $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                 return true;
             }
@@ -206,7 +206,7 @@ class UsersController extends AbstractActionController
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to edit user.@danger" );
+                    $this->flashmessenger()->addMessage( "Failed to edit User.@danger" );
                     $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                     return false;
                 }

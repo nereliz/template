@@ -58,7 +58,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
     {
         //if already login, redirect to success page 
         if( $this->getAuthService()->hasIdentity() )
-            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+            return $this->redirect()->toRoute( 'config_ivrs', [ 'action'=> 'list' ] );
        
         $form    = $this->getForm();
         $form->prepare();
@@ -99,10 +99,10 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
                     $this->getAuthService()->getStorage()->write( $result->getIdentity() );
                     $this->setDefaultTenant();
                     
-                    $this->flashmessenger()->addMessage( "You've been logged in@success" );
+                    $this->flashmessenger()->addMessage( "{t}You've been logged in{/t}@success" );
                     return $this->redirect()->toRoute( 'config_ivrs', [ 'action'=> 'index' ] );
                 }
-                $this->flashmessenger()->addMessage( "Wrong username or password.@danger" );
+                $this->flashmessenger()->addMessage( "{t}Wrong username or password.{/t}@danger" );
                 return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
             }
         }
@@ -114,7 +114,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
         $this->getSessionStorage()->forgetMe();
         $this->getAuthService()->clearIdentity();
     
-        $this->flashmessenger()->addMessage("You've been logged out@success");
+        $this->flashmessenger()->addMessage("{t}You've been logged out{/t}@success");
         return $this->redirect()->toRoute( 'login' );
     }
     
@@ -124,7 +124,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
         $dTenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $_POST['te_id'] ] );
         if( !$dTenant )
         {
-            $this->flashmessenger()->addMessage( "Tenant not found1.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Tenant not found.{/t}@danger" );
             return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
         }
         
@@ -142,12 +142,12 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
         if( array_key_exists( $dTenant->getTeId(), $aTenants ) )                                                                                                    
         {
             $this->setDefaultTenant( $dTenant );
-            $this->flashmessenger()->addMessage( "Current tenant is switced to {$dTenant->getTeName()}.@success" );
+            $this->flashmessenger()->addMessage( "{t}Current tenant is switced to {/t}{$dTenant->getTeName()}.@success" );
             return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
         }
         else
         {
-            $this->flashmessenger()->addMessage( "Tenant not found2.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Tenant not found{/t}.@danger" );
             return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );   
         }
     }        

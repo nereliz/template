@@ -13,7 +13,7 @@ return [
                 'options' => [
                     'route'    => '/auth',
                         'defaults' => [
-                        '__NAMESPACE__' => 'Auth\Controller',
+                        '__NAMESPACE__' => 'Auth\\Controller',
                         'controller'    => 'Auth',
                         'action'        => 'login',
                     ],
@@ -48,6 +48,15 @@ return [
                 ],
             ],
         ],
+    ],
+    'translator' => [
+        'translation_file_patterns' => [
+            [
+                 'type'     => 'gettext',
+                 'base_dir' => __DIR__ . '/../language',
+                 'pattern'  => '%s.mo',
+            ],
+        ],	
     ],
     'view_manager' => [
         'template_path_stack' => [

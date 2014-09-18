@@ -1,0 +1,17 @@
+msgid "Login"
+msgstr "Prisijungti"
+
+msgid "Username"
+msgstr "Vartotojo Vardas"
+
+msgid "Password"
+msgstr "Slaptažodis"
+
+msgid "Remember Me"
+msgstr "Įsiminti mane"
+
+msgid "Submit"
+msgstr "Siųsti"
+
+msgid "You've been logged in"
+msgstr "Sėkmingai prisijungėte prie savo paskyros"

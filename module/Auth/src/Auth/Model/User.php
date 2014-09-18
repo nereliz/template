@@ -15,7 +15,7 @@ class User
      * @Annotation\Required({"required":"true" })
      * @Annotation\Filter({"name":"StripTags"})
      * @Annotation\Filter({"name":"StringTrim"})
-     * @Annotation\Options({"label":"Username:"})
+     * @Annotation\Options({"label":"{t}Username{/t}:"})
      */
     public $username;
 
@@ -26,19 +26,19 @@ class User
      * @Annotation\Filter({"name":"StripTags"})
      * @Annotation\Filter({"name":"StringTrim"})
      * @Annotation\Validator({"name":"StringLength", "options": {"min":6}})
-     * @Annotation\Options({"label":"Password:"})
+     * @Annotation\Options({"label":"{t}Password{/t}:"})
      */
     public $password;
 
     /**
      * @Annotation\Type("Zend\Form\Element\Checkbox")
-     * @Annotation\Options({"label":"Remember Me"})
+     * @Annotation\Options({"label":"{t}Remember Me{/t}"})
      */
     public $rememberme;
 
     /**
      * @Annotation\Type("Zend\Form\Element\Submit")
-     * @Annotation\Attributes({"value":"Submit","class":"btn btn-primary"})
+     * @Annotation\Attributes({"value":"{t}Submit{/t}","class":"btn btn-primary"})
      */
     public $submit;
 }

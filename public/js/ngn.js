@@ -2,6 +2,27 @@
 // Alert message functions
 //*
 
+$( "a[id|='list-remove']" ).on( 'click', function( event ){
+    event.preventDefault();
+        bootbox.dialog({
+                message: "{t}Are you shure you want to delete selected object?{/t}",
+                        title: "{t}Are you shure?{/t}",
+                                buttons: {
+                                            danger: {
+                                                            label: "{t}Remove{/t}",
+                                                                            className: "btn-danger",
+                                                                                            callback: function() {
+                                                                                                                window.location = $( event.delegateTarget ).attr( "href" );
+                                                                                                                                } 
+                                                                                                                                            },
+                                                                                                                                                        main: {
+                                                                                                                                                                        label: "{t}Cancel{/t}", 
+                                                                                                                                                                                        className: "btn-default",
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                                });
+                                                                                                                                                                                                                });
+                                                                                                                                                                                                                
 
 $( 'document' ).ready( function(){
     // A good percentage of pages will have message boxes - this activates them all
@@ -42,7 +63,8 @@ $( 'document' ).ready( function(){
       sortable: true,
       animate: true,
       addItemTarget: 'bottom',
-      removeLabel: '<span class="glyphicon glyphicon-trash"></span>'
+      removeLabel: '<span class="glyphicon glyphicon-trash"></span>',
+      selectClass: 'asmselect form-control chosen'
     });
     
     $( "select.chosen" ).each( function( item ){
@@ -51,7 +73,7 @@ $( 'document' ).ready( function(){
         else
           $( this ).chosen({width: "100\%"});
     });
-    
+        
     $( ".with-popover" ).each( function( item ){
         $( this ).popover();
     });

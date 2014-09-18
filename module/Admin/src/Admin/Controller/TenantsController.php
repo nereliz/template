@@ -34,7 +34,7 @@ class TenantsController extends AbstractActionController
         $tenants = $em->getRepository('Application\\Entity\\TeTenants')->findAll();
         if( !$tenants )
         {
-            $this->flashmessenger()->addMessage( "Failed to get Tenants.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Failed to get Tenants.{/t}@danger" );
             $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
             return false;
         }
@@ -69,14 +69,14 @@ class TenantsController extends AbstractActionController
                 $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teName' => $data['teName'] ] );
                 if( $tmp )
                 {
-                    $form->get( 'teName' )->setMessages( [ 'This name already in use' ] );
+                    $form->get( 'teName' )->setMessages( [ '{t}This name already in use{/t}' ] );
                     return $this->finalise( [ 'form' => $form ] );
                 }
                 
                 $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teCode' => $data['teCode'] ] );
                 if( $tmp )
                 {    
-                    $form->get( 'teCode' )->setMessages( [ 'This code already in use' ] );
+                    $form->get( 'teCode' )->setMessages( [ '{t}This code already in use{/t}' ] );
                     return $this->finalise( [ 'form' => $form ] );
                 }
                 
@@ -129,14 +129,14 @@ class TenantsController extends AbstractActionController
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to add user.@danger" );
-                    $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                    $this->flashmessenger()->addMessage( "{t}Failed to add Tenant.{/t}@danger" );
+                    $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
-                $this->flashmessenger()->addMessage( "Tenant was added successfully.@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new tenant with id %s" , $this->getIdentity()->GetUsId(), $tenant->getTeId() ) );
-                $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                $this->flashmessenger()->addMessage( "{t}Tenant was added successfully.{/t}@success" );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new tenant with id %s" , $this->getIdentity()->getUsId(), $tenant->getTeId() ) );
+                $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
                 return true;
             }
         }
@@ -154,10 +154,10 @@ class TenantsController extends AbstractActionController
             return false;
         }
             
-        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\teTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
+        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
         if( !$tenant )
         {
-            $this->flashmessenger()->addMessage( "Failed to retrieve Tenant.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Failed to retrieve Tenant.{/t}@danger" );
             $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
             return false;
         }
@@ -179,7 +179,7 @@ class TenantsController extends AbstractActionController
                     $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teName' => $data['teName'] ] );
                     if( $tmp )
                     {
-                        $form->get( 'teName' )->setMessages( [ 'This name already in use' ] );
+                        $form->get( 'teName' )->setMessages( [ '{t}This name already in use{/t}' ] );
                         return $this->finalise( [ 'form' => $form ] );
                     }
                 }
@@ -221,12 +221,12 @@ class TenantsController extends AbstractActionController
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to edit Tenant.@danger" );
+                    $this->flashmessenger()->addMessage( "{t}Failed to edit Tenant.{/t}@danger" );
                     $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
-                $this->flashmessenger()->addMessage( "Tenant was edited successfully.@success" );
+                $this->flashmessenger()->addMessage( "{t}Tenant was edited successfully.{/t}@success" );
                 $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited tenant with id %s" , $this->getIdentity()->getUsId(), $tenant->getTeId() ) );
                 $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
                 return true;
@@ -248,7 +248,7 @@ class TenantsController extends AbstractActionController
         $tenant = $this->getEManager()->getRepository( "Application\\Entity\\teTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
         if( !$tenant )
         {
-            $this->flashmessenger()->addMessage( "Failed to retrieve Tenant.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Failed to retrieve Tenant.{/t}@danger" );
             $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
             return false;
         }
@@ -259,13 +259,13 @@ class TenantsController extends AbstractActionController
         }
         catch( Exception $e )
         {
-            $this->flashmessenger()->addMessage( "Failed to remove Tenant.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Failed to remove Tenant.{/t}@danger" );
             $this->redirect()->toRoute( 'admin_tenents', [ 'action'=> 'list' ] );
             return false;
         }
                 
-        $this->flashmessenger()->addMessage( "Tenant was removed successfully.@success" );
-        $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "Tenant with id %s removed user with id %s" , $this->getIdentity()->getUsId(), $this->params( 'te_id'  ) ) );
+        $this->flashmessenger()->addMessage( "{t}Tenant was removed successfully.{/t}@success" );
+        $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s removed tenant with id %s" , $this->getIdentity()->getUsId(), $this->params( 'te_id'  ) ) );
         $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
         
         return true; 
@@ -286,8 +286,8 @@ class TenantsController extends AbstractActionController
         $form->setAttribute( 'action', "/admin/tenants/" . ( $tenant ? "edit/{$tenant->getTeId()}" : "add" ) );
         $form->add( $sform );
         
-        $form->get( 'clId' )->setValueOptions( [ '' => "Do not apply call rate" ] + $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->getNamesIdsList() );
-        $form->get( 'teTimezone' )->setValueOptions( [ '' => "User server Default"] + $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->getNamesIdsList() );
+        $form->get( 'clId' )->setValueOptions( [ '' => "{t}Do not apply call rate{/t}" ] + $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->getNamesIdsList() );
+        $form->get( 'teTimezone' )->setValueOptions( [ '' => "{t}User server Default{/t}"] + $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->getNamesIdsList() );
         $form->get( 'rpId' )->setValueOptions( $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->getNamesIdsList() );
         
         if( $tenant )
