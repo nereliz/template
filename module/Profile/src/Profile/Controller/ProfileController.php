@@ -29,8 +29,8 @@ class ProfileController extends AbstractActionController
 
     public function indexAction()
     {
-        if( !$this->getAuth()->hasIdentity() )
-            return $this->redirect()->toRoute( 'login' );
+        if( !$this->isAuth() )
+            return false;
         
         $dataForm = $this->resolveProfileDataForm();
         $pwdForm = $this->resolveProfilePasswordForm();

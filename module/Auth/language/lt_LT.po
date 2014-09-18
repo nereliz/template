@@ -15,3 +15,9 @@ msgstr "Siųsti"
 
 msgid "You've been logged in"
 msgstr "Sėkmingai prisijungėte prie savo paskyros"
+
+msgid "You've been logged out"
+msgstr "Sėkmingai atsijungėte nuo savo paskyros"
+
+msgid "Current tenant is switced to "
+msgstr "Darbinė kompanija pakeist į "

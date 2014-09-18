@@ -19,8 +19,17 @@ msgstr "Redaguot"
 msgid "Remove"
 msgstr "Pašalinti"
 
+msgid "Download"
+msgstr "Parsisiųsti"
+
+msgid "Play"
+msgstr "Groti"
+
 msgid "Add New"
-msgstr "Prodėti Nauja"
+msgstr "Pridėti Nauja"
+
+msgid "Go back"
+msgstr "Grįžti atgal"
 
 msgid "Cancel"
 msgstr "Atšaukti"

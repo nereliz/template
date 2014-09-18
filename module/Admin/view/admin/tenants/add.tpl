@@ -2,7 +2,7 @@
 <div class="container-fluid">
     <h1>
         <div class="pull-right">
-            <a class="btn btn-default btn-sm have-tooltip" title="Go back" href="{$this->url( 'admin_tenants', [ 'action'=> 'list' ] )}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+            <a class="btn btn-default btn-sm have-tooltip" title="{t}Go back{/t}" href="{$this->url( 'admin_tenants', [ 'action'=> 'list' ] )}"><span class="glyphicon glyphicon-arrow-left"></span></a>
         </div>
 	{t}Add Tenant{/t}
         {$this->headTitle( $this->translate( 'Add Tenant' ) )}
@@ -157,7 +157,7 @@
 <div class="row">
 <div class="col-md-10"></div>
 <div class="col-md-1">
-    {$this->formElement( $form->get('submit_data') )}
+    {include file=$config['template']['form/element'] element=$form->get('submit_data')}
 </div>
 <div class="col-md-1"></div>
 </div>

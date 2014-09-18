@@ -24,32 +24,20 @@ class TenantsController extends AbstractActionController
         
     public function listAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+        if( !$this->isAuth( 1 ) )
             return false;
-        }
         
         $em = $this->getEManager();
         $tenants = $em->getRepository('Application\\Entity\\TeTenants')->findAll();
-        if( !$tenants )
-        {
-            $this->flashmessenger()->addMessage( "{t}Failed to get Tenants.{/t}@danger" );
-            $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
-            return false;
-        }
-        
+
         return $this->finalise( [ 'tenants' => $tenants ] );
         
     }
     
     public function addAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
+        if( !$this->isAuth( 1 ) )
             $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
-            return false;
-        }
             
         $form = $this->resolveForm();        
         if( $this->getRequest()->isPost() )
@@ -148,19 +136,8 @@ class TenantsController extends AbstractActionController
     
     public function editAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+        if( !$this->isAuth( 1 ) || !( $tenant = $this->getRequestedTenant() ) )
             return false;
-        }
-            
-        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
-        if( !$tenant )
-        {
-            $this->flashmessenger()->addMessage( "{t}Failed to retrieve Tenant.{/t}@danger" );
-            $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
-            return false;
-        }
 
         $form = $this->resolveForm( $tenant );
 
@@ -238,21 +215,10 @@ class TenantsController extends AbstractActionController
     }
     
     public function removeAction()
-    {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+    {    
+        if( !$this->isAuth( 1 ) || !( $tenant = $this->getRequestedTenant() ) )
             return false;
-        }
-            
-        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\teTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
-        if( !$tenant )
-        {
-            $this->flashmessenger()->addMessage( "{t}Failed to retrieve Tenant.{/t}@danger" );
-            $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
-            return false;
-        }
-        
+
         try{
             $this->getEManager()->remove( $tenant );
             $this->getEManager()->flush();
@@ -269,6 +235,19 @@ class TenantsController extends AbstractActionController
         $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
         
         return true; 
+    }
+    
+    protected function getRequestedTenant()
+    {
+        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
+        if( !$tenant )
+        {
+            $this->flashmessenger()->addMessage( "{t}Failed to retrieve Tenant.{/t}@danger" );
+            $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
+            return false;
+        }
+        
+        return $tenant;
     }
         
     private function resolveForm( $tenant = false )

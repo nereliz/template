@@ -34,7 +34,7 @@ class Module
              return new View\Helper( $e->getRouteMatch() );
         });
         
-        $lang = isset( $defaults->lang ) && $defaults->lang  ? $defaults->lang : 'lt_LT';
+        $lang = isset( $defaults->lang ) && $defaults->lang  ? $defaults->lang : 'en_US';
         $translator = $sm->get('translator');
         $translator->setLocale( $lang )->setFallbackLocale('en_US');
         

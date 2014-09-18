@@ -23,20 +23,11 @@ class UsersController extends AbstractActionController
         
     public function listAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+        if( !$this->isAuth( 1 ) )
             return false;
-        }
         
         $em = $this->getEManager();
         $users = $em->getRepository('Application\\Entity\\UsUsers')->findAll();
-        if( !$users )
-        {
-            $this->flashmessenger()->addMessage( "Failed to get users.@danger" );
-            $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
-            return false;
-        }
         
         return $this->finalise( [ 'users' => $users ] );
         
@@ -44,11 +35,8 @@ class UsersController extends AbstractActionController
     
     public function addAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+        if( !$this->isAuth( 1 ) )
             return false;
-        }
             
         $form = $this->resolveForm();        
         if( $this->getRequest()->isPost() )
@@ -107,12 +95,12 @@ class UsersController extends AbstractActionController
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to add User.@danger" );
+                    $this->flashmessenger()->addMessage( "{t}Failed to add User.{/t}@danger" );
                     $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
-                $this->flashmessenger()->addMessage( "User was added successfully.@success" );
+                $this->flashmessenger()->addMessage( "{t}User was added successfully.{/t}@success" );
                 $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new user with id %s" , $this->getIdentity()->getUsId(), $user->getUsId() ) );
                 $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                 return true;
@@ -126,19 +114,8 @@ class UsersController extends AbstractActionController
     
     public function editAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+        if( !$this->isAuth( 1 ) || !( $user = $this->getRequestedUser() ) )
             return false;
-        }
-            
-        $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
-        if( !$user )
-        {
-            $this->flashmessenger()->addMessage( "Failed to retrieve User.@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
-            return false;
-        }
 
         $form = $this->resolveForm( $user );
 
@@ -206,12 +183,12 @@ class UsersController extends AbstractActionController
                 }
                 catch( Exception $e )
                 {
-                    $this->flashmessenger()->addMessage( "Failed to edit User.@danger" );
+                    $this->flashmessenger()->addMessage( "{t}Failed to edit User.{/t}@danger" );
                     $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                     return false;
                 }
                 
-                $this->flashmessenger()->addMessage( "User was edited successfully.@success" );
+                $this->flashmessenger()->addMessage( "{t}User was edited successfully.{/t}@success" );
                 $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited user with id %s" , $this->getIdentity()->getUsId(), $user->getUsId() ) );
                 $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
                 return true;
@@ -224,19 +201,8 @@ class UsersController extends AbstractActionController
     
     public function removeAction()
     {
-        if( !$this->getAuth()->hasIdentity() || $this->getIdentity()->getUpUserprofile()->getUpId() != 1 )
-        {
-            $this->redirect()->toRoute( 'index', [ 'action' => "index" ] );
+        if( !$this->isAuth( 1 ) || !( $user = $this->getRequestedUser() ) )
             return false;
-        }
-            
-        $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
-        if( !$user )
-        {
-            $this->flashmessenger()->addMessage( "Failed to retrieve User.@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
-            return false;
-        }
         
         try{
             $this->getEManager()->remove( $user );
@@ -244,16 +210,29 @@ class UsersController extends AbstractActionController
         }
         catch( Exception $e )
         {
-            $this->flashmessenger()->addMessage( "Failed to remove user.@danger" );
+            $this->flashmessenger()->addMessage( "{t}Failed to remove user.{/t}@danger" );
             $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
             return false;
         }
                 
-        $this->flashmessenger()->addMessage( "User was removed successfully.@success" );
+        $this->flashmessenger()->addMessage( "{t}User was removed successfully.{/t}@success" );
         $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s removed user with id %s" , $this->getIdentity()->getUsId(), $this->params( 'us_id'  ) ) );
         $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
         
         return true; 
+    }
+    
+    protected function getRequestedUser()
+    {
+        $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
+        if( !$user )
+        {
+            $this->flashmessenger()->addMessage( "{t}Failed to retrieve User.{/t}@danger" );
+            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+            return false;
+        }
+        
+        return $user;
     }
         
     private function resolveForm( $user = false )

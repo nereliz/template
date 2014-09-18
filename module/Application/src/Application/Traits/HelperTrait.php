@@ -101,18 +101,18 @@ trait HelperTrait{
      * @param string|bool $type Identity type should be as given.
      * @return booln
      */
-    private function isAuth( $type = false )
+    private function isAuth( $up_id = false )
     {
         if( !$this->getAuth()->hasIdentity() )
         {
-            $this->flashmessenger()->addMessage( "You need to loign first@danger" );
+            $this->flashmessenger()->addMessage( "{t}You need to loign first{/t}@danger" );
             $this->redirect()->toRoute( 'auth', [ 'action'=> 'login' ] );
             return flase;
         }
 
-        if( $type && $this->identity()['type'] != $type )
+        if( $up_id && $this->getIdentity()->getUpUserprofile()->getUpId() != $up_id  )
         {
-            $this->flashmessenger()->addMessage( "You do not have permisions to do this action@danger" );
+            $this->flashmessenger()->addMessage( "{t}You do not have permisions to do this action{/t}@danger" );
             $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
             return flase;
         }
