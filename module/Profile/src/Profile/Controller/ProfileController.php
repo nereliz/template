@@ -18,6 +18,7 @@ class ProfileController extends AbstractActionController
     use HelperTrait;
     
     protected $storage;
+    protected $main_route = "profile";
 
     public function getSessionStorage()
     {
@@ -50,7 +51,7 @@ class ProfileController extends AbstractActionController
                     {
                         case 1:
                             $this->flashmessenger()->addMessage( "{t}Username updated successfully.{/t}@success" );
-                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            return $this->redirect()->toRoute( $this->main_route, [ 'action'=> "index" ] );
                             break;
 
                         case 2:
@@ -65,7 +66,7 @@ class ProfileController extends AbstractActionController
 
                         default:
                             $this->flashmessenger()->addMessage( "{t}Unexpected erro occured please try again later.{/t}@danger" );
-                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            return $this->redirect()->toRoute( $this->main_route, [ 'action'=> "index" ] );
                             break;
                     }
                 }
@@ -84,7 +85,7 @@ class ProfileController extends AbstractActionController
                     {
                         case 1:
                             $this->flashmessenger()->addMessage( "{t}Password updated successfully.{/t}@success" );
-                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            return $this->redirect()->toRoute( $this->main_route, [ 'action'=> "index" ] );
                             break;
 
                         case 2:
@@ -104,7 +105,7 @@ class ProfileController extends AbstractActionController
 
                         default:
                             $this->flashmessenger()->addMessage( "{t}Unexpected erro occured please try again later.{/t}@danger" );
-                            return $this->redirect()->toRoute( 'profile', [ 'action'=> 'index' ] );
+                            return $this->redirect()->toRoute( $this->main_route, [ 'action'=> "index" ] );
                             break;
                     }
                 }

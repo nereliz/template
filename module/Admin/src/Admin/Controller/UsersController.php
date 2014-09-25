@@ -15,10 +15,14 @@ class UsersController extends AbstractActionController
     implements ConfigAwareInterface
 {
     use HelperTrait;
-    
+
+    protected $entity_name = "Application\\Entity\\UsUsers";
+    protected $entity_prefix = "us";
+    protected $main_route = "admin_users";
+        
     public function indexAction()
     {
-        $this->redirect()->toRoute( 'admin_users', [ 'action' => 'list' ] );
+        $this->redirect()->toRoute( $this->main_route, [ 'action' => "list" ] );
     }
         
     public function listAction()
@@ -26,11 +30,7 @@ class UsersController extends AbstractActionController
         if( !$this->isAuth( 1 ) )
             return false;
         
-        $em = $this->getEManager();
-        $users = $em->getRepository('Application\\Entity\\UsUsers')->findAll();
-        
-        return $this->finalise( [ 'users' => $users ] );
-        
+        return $this->finalise( [ 'objects' => $this->getEManager()->getRepository( $this->entity_name )->findAll() ] );
     }
     
     public function addAction()
@@ -47,35 +47,35 @@ class UsersController extends AbstractActionController
                 $data = $form->getData();
                 unset( $data['submit'] );
                 
-                $user = new \Application\Entity\UsUsers();
+                $object = new \Application\Entity\UsUsers();
                 
                 $tmp = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usUsername' => $data['us_username'] ] );
                 if( $tmp )
                 {
-                    $form->get( 'us_username' )->setMessages( [ 'This user name already in use' ] );
+                    $form->get( 'us_username' )->setMessages( [ '{t}This user name already in use{/t}' ] );
                     return $this->finalise( [ 'form' => $form ] );
                 }
                 else
-                    $user->setUsUsername( $data['us_username'] );
+                    $object->setUsUsername( $data['us_username'] );
                 
                 if( !$data['us_password'] )
                 {    
-                    $form->get( 'us_password' )->setMessages( [ 'This value can not be empty' ] );
+                    $form->get( 'us_password' )->setMessages( [ '{t}This value can not be empty{/t}' ] );
                     return $this->finalise( [ 'form' => $form ] );
                 }
                 else
-                    $user->setUsPassword( $user->hashPassword( $data['us_password'] ) );
+                    $object->setUsPassword( $object->hashPassword( $data['us_password'] ) );
                 
                 $profile = $this->getEManager()->getRepository( "Application\\Entity\\UpUserprofiles" )->findOneBy( [ 'upId' => $data['up_id'] ] );
-                $user->setUpUserProfile( $profile );
+                $object->setUpUserProfile( $profile );
                 
                 if( $data['te_ids'] )
                 {
                     foreach( $data['te_ids'] as $teid )
                     {
                         $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $teid ] );
-                        if( !$user->getTeTenants()->contains( $tenant ) )
-                            $user->getTeTenants()->add( $tenant );
+                        if( !$object->getTeTenants()->contains( $tenant ) )
+                            $object->getTeTenants()->add( $tenant );
                     }
                 }
                         
@@ -84,25 +84,25 @@ class UsersController extends AbstractActionController
                     foreach( $data['rp_ids'] as $rpid )
                     {
                         $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $rpid ] );
-                        if( !$user->getRpRoutingprofiles()->contains( $rprofile ) )
-                            $user->getRpRoutingprofiles()->add( $rprofile );
+                        if( !$object->getRpRoutingprofiles()->contains( $rprofile ) )
+                            $object->getRpRoutingprofiles()->add( $rprofile );
                     }
                 }
 
                 try{
-                    $this->getEManager()->persist( $user );
+                    $this->getEManager()->persist( $object );
                     $this->getEManager()->flush();
                 }
                 catch( Exception $e )
                 {
                     $this->flashmessenger()->addMessage( "{t}Failed to add User.{/t}@danger" );
-                    $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                    $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                     return false;
                 }
                 
                 $this->flashmessenger()->addMessage( "{t}User was added successfully.{/t}@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new user with id %s" , $this->getIdentity()->getUsId(), $user->getUsId() ) );
-                $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new user with id %s" , $this->getIdentity()->getUsId(), $object->getUsId() ) );
+                $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                 return true;
             }
         }
@@ -114,10 +114,10 @@ class UsersController extends AbstractActionController
     
     public function editAction()
     {
-        if( !$this->isAuth( 1 ) || !( $user = $this->getRequestedUser() ) )
+        if( !$this->isAuth( 1 ) || !( $object = $this->getRequestedObject( false ) ) )
             return false;
 
-        $form = $this->resolveForm( $user );
+        $form = $this->resolveForm( $object );
 
         if( $this->getRequest()->isPost() )
         {
@@ -126,24 +126,24 @@ class UsersController extends AbstractActionController
             {
                 $data = $form->getData();
                 
-                if( $data['us_username'] != $user->getUsUsername() )
+                if( $data['us_username'] != $object->getUsUsername() )
                 {
                     $tmp = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usUsername' => $data['us_username'] ] );
                     if( $tmp )
                     {
-                        $form->get( 'us_username' )->setMessages( [ 'This user name already in use' ] );
+                        $form->get( 'us_username' )->setMessages( [ '{t}This user name already in use{/t}' ] );
                         return $this->finalise( [ 'form' => $form ] );
                     }
-                    $user->setUsUsername( $data['us_username'] );
+                    $object->setUsUsername( $data['us_username'] );
                 }
                 
                 if( $data['us_password'] )
-                    $user->setUsPassword( $user->hashPassword( $data['us_password'] ) );
+                    $object->setUsPassword( $object->hashPassword( $data['us_password'] ) );
                 
-                if( $data['up_id'] != $user->getUpUserprofile()->getUpId() )
+                if( $data['up_id'] != $object->getUpUserprofile()->getUpId() )
                 {
                     $profile = $this->getEManager()->getRepository( "Application\\Entity\\UpUserprofiles" )->findOneBy( [ 'upId' => $data['up_id'] ] );
-                    $user->setUpUserProfile( $profile );
+                    $object->setUpUserProfile( $profile );
                 }
                 
                 if( $data['te_ids'] )
@@ -151,32 +151,32 @@ class UsersController extends AbstractActionController
                     foreach( $data['te_ids'] as $teid )
                     {
                         $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $teid ] );
-                        if( !$user->getTeTenants()->contains( $tenant ) )
-                            $user->getTeTenants()->add( $tenant );
+                        if( !$object->getTeTenants()->contains( $tenant ) )
+                            $object->getTeTenants()->add( $tenant );
                     }
                 }
                 else
                     $data['te_ids'] = array();
                     
-                foreach( $user->getTeTenants() as $tenant )
+                foreach( $object->getTeTenants() as $tenant )
                     if( !in_array( $tenant->getTeId(), $data['te_ids'] ) )
-                        $user->getTeTenants()->removeElement( $tenant );
+                        $object->getTeTenants()->removeElement( $tenant );
                         
                 if( $data['rp_ids'] )
                 {
                     foreach( $data['rp_ids'] as $rpid )
                     {
                         $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $rpid ] );
-                        if( !$user->getRpRoutingprofiles()->contains( $rprofile ) )
-                            $user->getRpRoutingprofiles()->add( $rprofile );
+                        if( !$object->getRpRoutingprofiles()->contains( $rprofile ) )
+                            $object->getRpRoutingprofiles()->add( $rprofile );
                     }
                 }
                 else
                     $data['rp_ids'] = array();
                     
-                foreach( $user->getRpRoutingprofiles() as $rprofile )
+                foreach( $object->getRpRoutingprofiles() as $rprofile )
                     if( !in_array( $rprofile->getRpId(), $data['rp_ids'] ) )
-                        $user->getRpRoutingprofiles()->removeElement( $rprofile );
+                        $object->getRpRoutingprofiles()->removeElement( $rprofile );
                 
                 try{
                     $this->getEManager()->flush();
@@ -184,13 +184,13 @@ class UsersController extends AbstractActionController
                 catch( Exception $e )
                 {
                     $this->flashmessenger()->addMessage( "{t}Failed to edit User.{/t}@danger" );
-                    $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                    $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                     return false;
                 }
                 
                 $this->flashmessenger()->addMessage( "{t}User was edited successfully.{/t}@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited user with id %s" , $this->getIdentity()->getUsId(), $user->getUsId() ) );
-                $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited user with id %s" , $this->getIdentity()->getUsId(), $object->getUsId() ) );
+                $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                 return true;
             }
         }
@@ -201,40 +201,27 @@ class UsersController extends AbstractActionController
     
     public function removeAction()
     {
-        if( !$this->isAuth( 1 ) || !( $user = $this->getRequestedUser() ) )
+        if( !$this->isAuth( 1 ) || !( $object = $this->getRequestedObject( false ) ) )
             return false;
         
         try{
-            $this->getEManager()->remove( $user );
+            $this->getEManager()->remove( $object );
             $this->getEManager()->flush();
         }
         catch( Exception $e )
         {
             $this->flashmessenger()->addMessage( "{t}Failed to remove user.{/t}@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+            $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
             return false;
         }
                 
         $this->flashmessenger()->addMessage( "{t}User was removed successfully.{/t}@success" );
         $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s removed user with id %s" , $this->getIdentity()->getUsId(), $this->params( 'us_id'  ) ) );
-        $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
+        $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
         
         return true; 
     }
     
-    protected function getRequestedUser()
-    {
-        $user = $this->getEManager()->getRepository( "Application\\Entity\\UsUsers" )->findOneBy( [ 'usId' => $this->params( 'us_id' ) ] );
-        if( !$user )
-        {
-            $this->flashmessenger()->addMessage( "{t}Failed to retrieve User.{/t}@danger" );
-            $this->redirect()->toRoute( 'admin_users', [ 'action'=> 'list' ] );
-            return false;
-        }
-        
-        return $user;
-    }
-        
     private function resolveForm( $user = false )
     {
         $muser = new User(); 

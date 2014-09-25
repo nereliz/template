@@ -17,21 +17,22 @@ class TenantsController extends AbstractActionController
 {
     use HelperTrait;
     
+    protected $entity_name = "Application\\Entity\\TeTenants";
+    protected $entity_prefix = "te";
+    protected $main_route = "admin_tenants";
+            
+    
     public function indexAction()
     {
-        $this->redirect()->toRoute( 'admin_tenants', [ 'action', 'list' ] );
+        $this->redirect()->toRoute( $this->main_route, [ 'action' => "list" ] );
     }
         
     public function listAction()
     {
         if( !$this->isAuth( 1 ) )
             return false;
-        
-        $em = $this->getEManager();
-        $tenants = $em->getRepository('Application\\Entity\\TeTenants')->findAll();
 
-        return $this->finalise( [ 'tenants' => $tenants ] );
-        
+        return $this->finalise( [ 'objects' => $this->getEManager()->getRepository( $this->entity_name )->findAll() ] );
     }
     
     public function addAction()
@@ -51,15 +52,11 @@ class TenantsController extends AbstractActionController
                 $data = $form->getData();
                 unset( $data['submit'] );
                 
-                $tenant = new \Application\Entity\TeTenants();
+                $object = new \Application\Entity\TeTenants();
                 $pklot = new \Application\Entity\PkParkinglots();
                 
-                $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teName' => $data['teName'] ] );
-                if( $tmp )
-                {
-                    $form->get( 'teName' )->setMessages( [ '{t}This name already in use{/t}' ] );
+                if( !$this->assertNameUinque( $form, $object, false, false ) )
                     return $this->finalise( [ 'form' => $form ] );
-                }
                 
                 $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teCode' => $data['teCode'] ] );
                 if( $tmp )
@@ -84,14 +81,14 @@ class TenantsController extends AbstractActionController
                 $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $data['rpId'] ] );
                 $clrate = $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->findOneBy( [ 'clId' => $data['clId'] ] );
                 
-                $tenant->updateFromArray( $data );                
-                $tenant->setTeTimezone( $tzone ? $tzone->getTzName() : "" );
-                $tenant->setRpRoutingprofile( $rprofile );
-                $tenant->setClClientrate( $clrate );
+                $object->updateFromArray( $data );                
+                $object->setTeTimezone( $tzone ? $tzone->getTzName() : "" );
+                $object->setRpRoutingprofile( $rprofile );
+                $object->setClClientrate( $clrate );
 
                 $pklot->updateFromArray( $data );
-                $pklot->setPkName( $tenant->getTeName() );
-                $pklot->setTeTenant( $tenant );
+                $pklot->setPkName( $object->getTeName() );
+                $pklot->setTeTenant( $object );
                 
                 $nodes = $this->getEManager()->getRepository( "Application\\Entity\\NoNodes" )->findAll();
                 if( $nodes )
@@ -106,25 +103,25 @@ class TenantsController extends AbstractActionController
                     $setting = new \Application\Entity\SeSettings();
                     $setting->setSeCode( $code );
                     $setting->setSeValue( $value );
-                    $setting->setTeTenant( $tenant );
+                    $setting->setTeTenant( $object );
                     $this->getEManager()->persist( $setting );
                 }
                 
                 try{
                     $this->getEManager()->persist( $pklot );
-                    $this->getEManager()->persist( $tenant );
+                    $this->getEManager()->persist( $object );
                     $this->getEManager()->flush();
                 }
                 catch( Exception $e )
                 {
                     $this->flashmessenger()->addMessage( "{t}Failed to add Tenant.{/t}@danger" );
-                    $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
+                    $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                     return false;
                 }
                 
                 $this->flashmessenger()->addMessage( "{t}Tenant was added successfully.{/t}@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new tenant with id %s" , $this->getIdentity()->getUsId(), $tenant->getTeId() ) );
-                $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id  %s added new tenant with id %s" , $this->getIdentity()->getUsId(), $object->getTeId() ) );
+                $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                 return true;
             }
         }
@@ -136,10 +133,10 @@ class TenantsController extends AbstractActionController
     
     public function editAction()
     {
-        if( !$this->isAuth( 1 ) || !( $tenant = $this->getRequestedTenant() ) )
+        if( !$this->isAuth( 1 ) || !( $object = $this->getRequestedObject( false ) ) )
             return false;
 
-        $form = $this->resolveForm( $tenant );
+        $form = $this->resolveForm( $object );
 
         if( $this->getRequest()->isPost() )
         {
@@ -151,15 +148,8 @@ class TenantsController extends AbstractActionController
             {
                 $data = $form->getData();
                 
-                if( $data['teName'] != $tenant->getTeName() )
-                {
-                    $tmp = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teName' => $data['teName'] ] );
-                    if( $tmp )
-                    {
-                        $form->get( 'teName' )->setMessages( [ '{t}This name already in use{/t}' ] );
-                        return $this->finalise( [ 'form' => $form ] );
-                    }
-                }
+                if( !$this->assertNameUinque( $form, $object, true, false ) )
+                    return $this->finalise( [ 'form' => $form ] );
                 
                 foreach( $data['settings'] as $key => $value )
                 {
@@ -175,22 +165,22 @@ class TenantsController extends AbstractActionController
                 
                 $tzone = $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->findOneBy( [ 'tzId' => $data['teTimezone'] ] );
                 
-                $tenant->updateFromArray( $data );                
-                $tenant->setTeTimezone( $tzone ? $tzone->getTzName() : "" );
+                $object->updateFromArray( $data );                
+                $object->setTeTimezone( $tzone ? $tzone->getTzName() : "" );
                 
-                if( $data['rpId'] != $tenant->getRpRoutingprofile()->getRpId() )
+                if( $data['rpId'] != $object->getRpRoutingprofile()->getRpId() )
                 {
                     $rprofile = $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->findOneBy( [ 'rpId' => $data['rpId'] ] );
-                    $tenant->setRpRoutingprofile( $rprofile );
+                    $object->setRpRoutingprofile( $rprofile );
                 }
                 
-                if( $data['clId'] != $tenant->getClClientrate() )
+                if( $data['clId'] != $object->getClClientrate() )
                 {
                     $clrate = $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->findOneBy( [ 'clId' => $data['clId'] ] );
-                    $tenant->setClClientrate( $clrate );
+                    $object->setClClientrate( $clrate );
                 }
 
-                $tenant->getPkParkinglot()->updateFromArray( $data );
+                $object->getPkParkinglot()->updateFromArray( $data );
                 
                 
                 try{
@@ -199,13 +189,13 @@ class TenantsController extends AbstractActionController
                 catch( Exception $e )
                 {
                     $this->flashmessenger()->addMessage( "{t}Failed to edit Tenant.{/t}@danger" );
-                    $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
+                    $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                     return false;
                 }
                 
                 $this->flashmessenger()->addMessage( "{t}Tenant was edited successfully.{/t}@success" );
-                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited tenant with id %s" , $this->getIdentity()->getUsId(), $tenant->getTeId() ) );
-                $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
+                $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s edited tenant with id %s" , $this->getIdentity()->getUsId(), $object->getTeId() ) );
+                $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
                 return true;
             }
         }
@@ -216,40 +206,27 @@ class TenantsController extends AbstractActionController
     
     public function removeAction()
     {    
-        if( !$this->isAuth( 1 ) || !( $tenant = $this->getRequestedTenant() ) )
+        if( !$this->isAuth( 1 ) || !( $object = $this->getRequestedObject( false ) ) )
             return false;
 
         try{
-            $this->getEManager()->remove( $tenant );
+            $this->getEManager()->remove( $object );
             $this->getEManager()->flush();
         }
         catch( Exception $e )
         {
             $this->flashmessenger()->addMessage( "{t}Failed to remove Tenant.{/t}@danger" );
-            $this->redirect()->toRoute( 'admin_tenents', [ 'action'=> 'list' ] );
+            $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
             return false;
         }
                 
         $this->flashmessenger()->addMessage( "{t}Tenant was removed successfully.{/t}@success" );
         $this->getServiceLocator()->get( 'Logger' )->debug( sprintf( "User with id %s removed tenant with id %s" , $this->getIdentity()->getUsId(), $this->params( 'te_id'  ) ) );
-        $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
+        $this->redirect()->toRoute( $this->main_route, [ 'action'=> "list" ] );
         
         return true; 
     }
     
-    protected function getRequestedTenant()
-    {
-        $tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $this->params( 'te_id' ) ] );
-        if( !$tenant )
-        {
-            $this->flashmessenger()->addMessage( "{t}Failed to retrieve Tenant.{/t}@danger" );
-            $this->redirect()->toRoute( 'admin_tenants', [ 'action'=> 'list' ] );
-            return false;
-        }
-        
-        return $tenant;
-    }
-        
     private function resolveForm( $tenant = false )
     {
         $mtenant = new Tenant(); 
@@ -266,7 +243,7 @@ class TenantsController extends AbstractActionController
         $form->add( $sform );
         
         $form->get( 'clId' )->setValueOptions( [ '' => "{t}Do not apply call rate{/t}" ] + $this->getEManager()->getRepository( "Application\\Entity\\ClClientrates" )->getNamesIdsList() );
-        $form->get( 'teTimezone' )->setValueOptions( [ '' => "{t}User server Default{/t}"] + $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->getNamesIdsList() );
+        $form->get( 'teTimezone' )->setValueOptions( [ '' => "{t}Use server Default{/t}"] + $this->getEManager()->getRepository( "Application\\Entity\\TzTimezones" )->getNamesIdsList() );
         $form->get( 'rpId' )->setValueOptions( $this->getEManager()->getRepository( "Application\\Entity\\RpRoutingprofiles" )->getNamesIdsList() );
         
         if( $tenant )

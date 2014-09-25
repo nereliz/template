@@ -92,7 +92,7 @@ trait HelperTrait{
             $aTenants = array();
         
         $dtenant = $this->getDefaultTenant();
-        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $idty, 'aTenants' => $aTenants, 'dTenant' => $dtenant ];
+        return $data + [ 'messages' => $this->flashmessenger()->getMessages(), 'config' => $this->config, 'auth' => $auth, 'idty' => $idty, 'aTenants' => $aTenants, 'dTenant' => $dtenant, 'main_route' => $this->main_route ];
     }
     
     /**
@@ -107,14 +107,14 @@ trait HelperTrait{
         {
             $this->flashmessenger()->addMessage( "{t}You need to loign first{/t}@danger" );
             $this->redirect()->toRoute( 'auth', [ 'action'=> 'login' ] );
-            return flase;
+            return false;
         }
 
         if( $up_id && $this->getIdentity()->getUpUserprofile()->getUpId() != $up_id  )
         {
             $this->flashmessenger()->addMessage( "{t}You do not have permisions to do this action{/t}@danger" );
             $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
-            return flase;
+            return false;
         }
 
         return true;
@@ -133,5 +133,47 @@ trait HelperTrait{
             return "hello";
         }
     }
+    
+    public function assertNameUinque( $form, $object, $edit = false, $tenant = true )
+    {
+        $data = $form->getData();
+        $prefix = strtolower( $this->entity_prefix );
+        $idfunc = "get" . ucfirst( $this->entity_prefix ) . "Id";
+    
+        $filter = [ $prefix . 'Name' => $data[ $prefix . 'Name'] ];
+        if( $tenant )
+            $filter[ 'teTenant' ] = $this->getDefaultTenant()->getTeId();
+    
+        $tmp = $this->getEManager()->getRepository( get_class( $object ) )->findOneBy( $filter );
+        if( !$tmp )
+            return true;
+                
+        if( !$edit || ( $edit && $tmp->{$idfunc}() != $object->{$idfunc}() ) )
+        {
+            $form->get( $prefix . 'Name' )->setMessages( [ '{t}This name already in use{/t}' ] );
+            return false;
+        }
+    
+        return true;
+    }
+    
+    protected function getRequestedObject( $tenant = true )
+    {
+        $filter = [ $this->entity_prefix . 'Id' => $this->params( $this->entity_prefix . '_id' ) ];
+        
+        if( $tenant )
+            $filter[ 'teTenant' ] = $this->getDefaultTenant()->getTeId();
+    
+        $obj = $this->getEManager()->getRepository( $this->entity_name )->findOneBy( $filter  );
+        if( !$obj )
+        {
+            $this->flashmessenger()->addMessage( "{t}Failed to retrieve requested object.{/t}@danger" );
+            $this->redirect()->toRoute( 'config_customs', [ 'action'=> 'list' ] );
+            return false;
+        }
+
+        return $obj;
+    }
+    
                                                                                                                
 }

@@ -26,6 +26,7 @@ return [
             'layout/messages' =>  __DIR__ . "/../../module/Application/view/layout/messages.tpl",
             'layout/topmenu'  =>  __DIR__ . "/../../module/Application/view/layout/top-menu.tpl",
             'form/element'    =>  __DIR__ . "/../../module/Application/view/layout/form/element.tpl",
+            'list/actions'    =>  __DIR__ . "/../../module/Application/view/layout/list-actions.tpl",
         ],
         
         'defaults' => [

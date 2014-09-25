@@ -2,7 +2,7 @@
 <div class="container-fluid">
     <h1>
         <div class="pull-right">
-            <a class="btn btn-default btn-sm have-tooltip" title="{t}Go back{/t}" href="{$this->url( 'admin_tenants', [ 'action'=> 'list' ] )}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+            <a class="btn btn-default btn-sm have-tooltip" title="{t}Go back{/t}" href="{$this->url( $main_route, [ 'action'=> 'list' ] )}"><span class="glyphicon glyphicon-arrow-left"></span></a>
         </div>
 	{t}Add Tenant{/t}
         {$this->headTitle( $this->translate( 'Add Tenant' ) )}

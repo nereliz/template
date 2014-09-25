@@ -17,6 +17,7 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
     protected $form;
     protected $storage;
     protected $authservice;
+    protected $main_route = 'auth';
     
     public function getAuthService()
     {

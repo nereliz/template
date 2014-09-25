@@ -19,22 +19,22 @@
             <th>{t}# Extensions{/t}</th>
             <th>{t}# Dids{/t}</th>
             <th>{t}Alerts{/t}</th>
-            <th><a class="btn btn-default btn-xs have-tooltip" title="{t}Add New{/t}" href="{$this->url( 'admin_tenants',[ 'action' => 'add' ] )}"><span class="glyphicon glyphicon-plus"></span></a></th>
+            <th><a class="btn btn-default btn-xs have-tooltip" title="{t}Add New{/t}" href="{$this->url( $main_route,[ 'action' => 'add' ] )}"><span class="glyphicon glyphicon-plus"></span></a></th>
         </tr>
     </thead>
     <tbody>
-    {foreach $tenants as $tenant}
+    {foreach $objects as $object}
     <tr>
-        <td>{$tenant->getTeName()}</td>
-        <td>{$tenant->getTeCode()}</td>
-        <td>{$tenant->getTeMaxchannels()}</td>
-        <td>{count( $tenant->getExExtensions() )} / {if $tenant->getTeMaxExtensions() >= 0}{$tenant->getTeMaxExtensions()}{else}{t}Unlimited{/t}{/if}</td>
-        <td>{count( $tenant->getDiDids() )} / {if $tenant->getTeMaxDids() >= 0}{$tenant->getTeMaxDids()}{else}{t}Unlimited{/t}{/if}</td>
-        <td>{$tenant->getTeAlertemail()}</td>
+        <td>{$object->getTeName()}</td>
+        <td>{$object->getTeCode()}</td>
+        <td>{$object->getTeMaxchannels()}</td>
+        <td>{count( $object->getExExtensions() )} / {if $object->getTeMaxExtensions() >= 0}{$object->getTeMaxExtensions()}{else}{t}Unlimited{/t}{/if}</td>
+        <td>{count( $object->getDiDids() )} / {if $object->getTeMaxDids() >= 0}{$object->getTeMaxDids()}{else}{t}Unlimited{/t}{/if}</td>
+        <td>{$object->getTeAlertemail()}</td>
         <td>
            <div class="btn-group btn-group-xs">
-                <a class="btn btn-default have-tooltip" title="{t}Edit{/t}" href="{$this->url( 'admin_tenants', [ 'action' => 'edit', 'te_id' => $tenant->getTeId()] )}"><span class="glyphicon glyphicon-pencil"></span></a>
-                {* <a id="list-remove-{$tenant@index}"class="btn btn-default have-tooltip" title="{t}Remove{/t}" href="{$this->url( 'admin_tenants', [ 'action' => 'remove', 'te_id' => $tenant->getTeId()] )}"><span class="glyphicon glyphicon-trash"></span></a> *}
+                <a class="btn btn-default have-tooltip" title="{t}Edit{/t}" href="{$this->url( $main_route, [ 'action' => 'edit', 'te_id' => $object->getTeId()] )}"><span class="glyphicon glyphicon-pencil"></span></a>
+                {* <a id="list-remove-{$object@index}"class="btn btn-default have-tooltip" title="{t}Remove{/t}" href="{$this->url( $main_route, [ 'action' => 'remove', 'te_id' => $object->getTeId()] )}"><span class="glyphicon glyphicon-trash"></span></a> *}
             </div>
         </td>
     </tr>
@@ -50,7 +50,7 @@
 </div>
 <script type="text/javascript">
 
-{if count($tenants) }
+{if count($objects) }
 $( document ).ready( function() {
     $( ".datatable" ).DataTable({
         "order": [[ 0, "asc" ]],
@@ -67,24 +67,6 @@ $( document ).ready( function() {
 });
 {/if}
 
-/*$( "a[id|='list-remove']" ).on( 'click', function( event ){
-    event.preventDefault();
-    bootbox.dialog({
-        message: "{t}Are you shure you want to delete selected object?{/t}",
-        title: "{t}Are you shure?{/t}",
-        buttons: {
-            danger: {
-                label: "{t}Remove{/t}",
-                className: "btn-danger",
-                callback: function() {
-                    window.location = $( event.delegateTarget ).attr( "href" );
-                }
-            },
-            main: {
-                label: "{t}Cancel{/t}",
-                className: "btn-default",
-            }
-        }
-    });
-});*/
 </script>
+
+{include file=$config['template']['list/actions'] }

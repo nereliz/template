@@ -8,6 +8,9 @@ body {
     color: #68b604; 
 }
 
+.hidden {
+    display: none;
+}
 
 
 /* Page header tweaks*/
