@@ -34,14 +34,26 @@ class Module
              return new View\Helper( $e->getRouteMatch() );
         });
         
+        //change here translation until UI will be done
+        $defaults->lang = "en_US";
         $lang = isset( $defaults->lang ) && $defaults->lang  ? $defaults->lang : 'en_US';
         $translator = $sm->get('translator');
         $translator->setLocale( $lang )->setFallbackLocale('en_US');
         
         $sm->get( 'viewhelpermanager' )->get('translate')->setTranslator( $translator );
         $sm->get( 'smarty' )->registerObject( 'translator', $translator );
-        $sm->get( 'smarty' )->registerPlugin( "block","t", "Application\\Traits\\HelperTrait::do_translation" );
+        $sm->get( 'smarty' )->registerPlugin( "block","t", "Application\\Smarty\\Plugins::do_translation" );
         
+        if( substr( $_SERVER['REQUEST_URI'], 0, 5 ) != "/auth" && substr( $_SERVER['REQUEST_URI'], 0, 6 ) != "/index" && $_SERVER['REQUEST_URI'] != "/" )
+        {
+            if( $defaults->current_url )
+            {
+                $defaults->prev_url = $defaults->current_url;
+                $defaults->current_url = $_SERVER['REQUEST_URI'];
+            }
+            else
+                $defaults->current_url = $_SERVER['REQUEST_URI'];  
+        }
     }
         
     public function bootstrapSession($e)

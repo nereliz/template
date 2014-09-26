@@ -101,9 +101,11 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
                     $this->setDefaultTenant();
                     
                     $this->flashmessenger()->addMessage( "{t}You've been logged in{/t}@success" );
-                    return $this->redirect()->toRoute( 'config_ivrs', [ 'action'=> 'index' ] );
                 }
-                $this->flashmessenger()->addMessage( "{t}Wrong username or password.{/t}@danger" );
+                else
+                    $this->flashmessenger()->addMessage( "{t}Wrong username or password.{/t}@danger" );
+                
+                $defaults = $this->getSessionDefaults();    
                 return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
             }
         }
@@ -120,8 +122,8 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
     }
     
     public function defaultTenantAction()
-    {    
-    
+    {   
+        $defaults = $this->getSessionDefaults();
         $dTenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $_POST['te_id'] ] );
         if( !$dTenant )
         {
@@ -142,14 +144,14 @@ class AuthController extends AbstractActionController implements ConfigAwareInte
         
         if( array_key_exists( $dTenant->getTeId(), $aTenants ) )                                                                                                    
         {
-            $this->setDefaultTenant( $dTenant );
+            $this->setDefaultTenant( $dTenant->getTeId() );
             $this->flashmessenger()->addMessage( "{t}Current tenant is switced to {/t}{$dTenant->getTeName()}.@success" );
             return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
         }
         else
         {
             $this->flashmessenger()->addMessage( "{t}Tenant not found{/t}.@danger" );
-            return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );   
+            return $this->redirect()->toRoute( 'index', [ 'action'=> 'index' ] );
         }
     }        
 }

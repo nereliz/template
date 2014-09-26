@@ -50,15 +50,15 @@ trait HelperTrait{
         
         if( $tenant )
         {
-            $defaults->tenant = $tenant;
+            $defaults->tenant = is_object( $tenant ) ? $tenant->getTeId() : $tenant;
         }
         else
         {
             $idty = $this->getIdentity();
             if( $idty && $idty->getUpUserprofile()->getUpId() != 1 )
-                $defaults->tenant = $idty->getTeTenants()[0];
+                $defaults->tenant = $idty->getTeTenants()[0]->getTeId();
             else
-                $defaults->tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findAll()[0];
+                $defaults->tenant = $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findAll()[0]->getTeId();
         }
         
         return $defaults->tenant;            
@@ -73,7 +73,12 @@ trait HelperTrait{
         else 
             $tenant = $this->setDefaultTenant();
             
-        return $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $tenant->getTeId() ] );
+        return $this->getEManager()->getRepository( "Application\\Entity\\TeTenants" )->findOneBy( [ 'teId' => $tenant ] );
+    }
+    
+    public function getSessionDefaults()
+    {
+        return new \Zend\Session\Container( 'defaults' );        
     }
                         
     
@@ -120,20 +125,6 @@ trait HelperTrait{
         return true;
     }
     
-    public function do_translation( $params, $content, $smarty, &$repeat, $template = false )
-    {
-        if( isset( $content ) )
-        {
-            $translator = $smarty->getRegisteredObject( 'translator' );
-            $lang = isset( $params["lang"] ) && $params["lang"] ? $params["lang"] : false;
-            $domain = isset( $params["domain"] ) && $params["domain"] ? $params["domain"] : 'default';
-            // do some translation with $content
-                                                                      
-            return $translator->translate( $content, $domain, $lang );
-            return "hello";
-        }
-    }
-    
     public function assertNameUinque( $form, $object, $edit = false, $tenant = true )
     {
         $data = $form->getData();
@@ -142,7 +133,7 @@ trait HelperTrait{
     
         $filter = [ $prefix . 'Name' => $data[ $prefix . 'Name'] ];
         if( $tenant )
-            $filter[ 'teTenant' ] = $this->getDefaultTenant()->getTeId();
+            $filter[ 'teTenant' ] = $this->getSessionDefaults()->tenant;
     
         $tmp = $this->getEManager()->getRepository( get_class( $object ) )->findOneBy( $filter );
         if( !$tmp )
@@ -168,7 +159,7 @@ trait HelperTrait{
         if( !$obj )
         {
             $this->flashmessenger()->addMessage( "{t}Failed to retrieve requested object.{/t}@danger" );
-            $this->redirect()->toRoute( 'config_customs', [ 'action'=> 'list' ] );
+            $this->redirect()->toRoute( $this->main_route, [ 'action'=> 'list' ] );
             return false;
         }
 
