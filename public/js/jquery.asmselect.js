@@ -83,6 +83,8 @@ $original.change(originalChangeEvent)
 
 if(options.sortable) makeSortable();
 
+order();
+
 if($.browser.msie && $.browser.version < 8) $ol.css('display', 'inline-block'); // Thanks Matthew Hutton
 }
 
@@ -454,8 +456,54 @@ $original.trigger('change', [{
 }]); 
 }
 
+function order(){
+    if( !$original.attr( 'data-order' ) )
+        return;
+
+    var order = $original.attr( 'data-order' ).split( "," );
+    if( !order )
+        return;
+
+    var items = Object();
+    $original.siblings( ".asmselect" ).each( function() {
+        $( this ).children( "option" ).each( function(){
+            if( $.inArray( $( this ).attr( "value" ), order ) != -1 )
+                items[$( this ).attr( "value" )] = $( this ).attr( "rel" );
+        });
+        $( this ).children( "optgroup" ).each( function(){
+            $( this ).children( "option" ).each( function(){
+                if( $.inArray( $( this ).attr( "value" ), order ) != -1 )
+                    items[$( this ).attr( "value" )] = $( this ).attr( "rel" );
+            });
+        });
+    });
+
+    $original.siblings( "ol" ).each( function() {
+        $( this ).children( "li" ).each( function() {
+            var item = $( this );
+            $.each( items, function( key, value ) {
+                if( item.attr( "rel" ) == value ){        
+                    items[key] = item;
+                }
+            });
+        });
+
+        $( this ).html("");
+        var ol = $( this );
+        $.each( order, function( key, value ){
+            ol.append( items[value] );
+            items[value].children( "." + options.removeClass ).click( function(){
+                dropListItem( items[value].attr( "rel" ) );
+                return false; 
+            });
+        });
+    });
+}
+
 init();
 });
 };
 
-})(jQuery); 
+
+
+})(jQuery);
